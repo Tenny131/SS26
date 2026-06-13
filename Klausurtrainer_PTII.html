@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Klausurtrainer · Produktionstechnik II</title>
+<style>
+  :root{
+    /* Konstruktionszeichnung / Blaupause als Leitbild des Faches */
+    --paper:#f3f0e7;        /* Werkstattpapier */
+    --ink:#16202b;          /* Tiefe Tinte */
+    --ink-soft:#3c4a57;
+    --line:#c8c2b0;         /* feine Hilfslinie */
+    --line-strong:#9aa6b2;
+    --blue:#1f4e6b;         /* Blaupause-Blau */
+    --blue-bright:#2f7fb0;
+    --accent:#c2562e;       /* Zunder-Orange, sparsam */
+    --good:#2f6b3c;
+    --ai:#6a4a86;           /* KI-Markierung violett */
+    --ai-bg:#efe9f4;
+    --field:#fbfaf5;
+    --shadow:0 1px 0 rgba(0,0,0,.04);
+    --mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+    --sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:var(--sans); line-height:1.55;
+    background-image:
+      linear-gradient(rgba(31,78,107,.045) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(31,78,107,.045) 1px, transparent 1px);
+    background-size:26px 26px;
+  }
+  .wrap{max-width:920px; margin:0 auto; padding:24px 18px 80px;}
+
+  /* ---------- Kopf ---------- */
+  header.masthead{
+    border:1.5px solid var(--ink); background:var(--field);
+    padding:18px 20px; position:relative; box-shadow:var(--shadow);
+  }
+  header.masthead::before{
+    content:""; position:absolute; inset:5px; border:1px solid var(--line-strong);
+    pointer-events:none;
+  }
+  .eyebrow{
+    font-family:var(--mono); font-size:11px; letter-spacing:.22em; text-transform:uppercase;
+    color:var(--blue); margin:0 0 6px;
+  }
+  h1{font-size:clamp(22px,4vw,34px); margin:0; letter-spacing:-.01em; font-weight:800;}
+  .sub{font-family:var(--mono); font-size:12px; color:var(--ink-soft); margin-top:8px;}
+  .stat-row{display:flex; flex-wrap:wrap; gap:14px 22px; margin-top:14px; font-family:var(--mono); font-size:11.5px; color:var(--ink-soft);}
+  .stat-row b{color:var(--ink); font-weight:700;}
+
+  /* ---------- Modus-Auswahl ---------- */
+  section.panel{margin-top:22px;}
+  .panel-title{
+    font-family:var(--mono); font-size:11px; letter-spacing:.2em; text-transform:uppercase;
+    color:var(--ink-soft); margin:0 0 10px; display:flex; align-items:center; gap:10px;
+  }
+  .panel-title::after{content:""; flex:1; height:1px; background:var(--line);}
+
+  .mode-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+  @media(max-width:560px){ .mode-grid{grid-template-columns:1fr;} }
+  .mode-card{
+    border:1.5px solid var(--ink); background:var(--field); padding:14px 16px;
+    text-align:left; cursor:pointer; font:inherit; color:inherit; position:relative;
+    transition:transform .08s ease, box-shadow .12s ease;
+  }
+  .mode-card:hover{ transform:translateY(-1px); box-shadow:3px 3px 0 var(--ink); }
+  .mode-card:focus-visible{ outline:3px solid var(--blue-bright); outline-offset:2px; }
+  .mode-card .mc-no{font-family:var(--mono); font-size:11px; color:var(--blue); letter-spacing:.1em;}
+  .mode-card .mc-h{font-weight:800; font-size:16px; margin:3px 0 4px;}
+  .mode-card .mc-d{font-size:12.5px; color:var(--ink-soft); line-height:1.45;}
+
+  /* VL-Auswahl */
+  .vl-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:8px; margin-top:4px;}
+  .vl-btn{
+    border:1.4px solid var(--line-strong); background:var(--field); color:var(--ink);
+    font:inherit; text-align:left; padding:9px 11px; cursor:pointer; position:relative;
+    transition:border-color .1s, background .1s;
+  }
+  .vl-btn:hover{ border-color:var(--blue); background:#fff; }
+  .vl-btn:focus-visible{ outline:3px solid var(--blue-bright); outline-offset:2px; }
+  .vl-btn .vl-k{font-family:var(--mono); font-size:11px; color:var(--blue); font-weight:700;}
+  .vl-btn .vl-l{display:block; font-size:12.5px; margin-top:2px; line-height:1.3;}
+  .vl-btn .vl-meta{font-family:var(--mono); font-size:10px; color:var(--ink-soft); margin-top:5px;}
+  .vl-btn[disabled]{opacity:.4; cursor:not-allowed;}
+
+  .hint{font-size:12px; color:var(--ink-soft); margin:10px 0 0; font-style:italic;}
+
+  /* ---------- Arbeitsbereich ---------- */
+  #work{margin-top:8px;}
+  .toolbar{
+    display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:space-between;
+    border:1.4px solid var(--ink); background:var(--ink); color:var(--paper);
+    padding:10px 14px; margin-bottom:18px;
+  }
+  .toolbar .tb-mode{font-family:var(--mono); font-size:11.5px; letter-spacing:.12em; text-transform:uppercase;}
+  .toolbar .tb-mode b{color:#fff;}
+  .toolbar .tb-actions{display:flex; gap:8px; flex-wrap:wrap;}
+
+  button.btn{
+    font:inherit; cursor:pointer; border:1.4px solid var(--ink); background:var(--field);
+    color:var(--ink); padding:8px 14px; font-weight:700; font-size:13px;
+    transition:transform .08s, box-shadow .1s;
+  }
+  button.btn:hover{ transform:translateY(-1px); box-shadow:2px 2px 0 var(--ink); }
+  button.btn:focus-visible{ outline:3px solid var(--blue-bright); outline-offset:2px; }
+  button.btn.primary{ background:var(--blue); color:#fff; border-color:var(--blue); }
+  button.btn.primary:hover{ box-shadow:2px 2px 0 var(--ink); }
+  button.btn.ghost{ background:transparent; color:var(--paper); border-color:var(--paper); }
+  button.btn.ghost:hover{ box-shadow:2px 2px 0 rgba(255,255,255,.4); }
+  button.btn.small{ padding:6px 10px; font-size:12px; }
+
+  /* Fragenkarte */
+  .qcard{
+    border:1.5px solid var(--ink); background:var(--field); margin-bottom:20px;
+    position:relative; box-shadow:var(--shadow);
+  }
+  .qcard .qhead{
+    display:flex; justify-content:space-between; align-items:flex-start; gap:12px;
+    padding:11px 16px; border-bottom:1.4px dashed var(--line-strong); background:#fff;
+  }
+  .qcard .q-cat{font-family:var(--mono); font-size:11px; letter-spacing:.08em; color:var(--blue); font-weight:700; text-transform:uppercase;}
+  .qcard .q-no{font-family:var(--mono); font-size:11px; color:var(--ink-soft);}
+  .qcard .qbody{padding:14px 16px 4px;}
+  .q-frage{font-size:15.5px; font-weight:600; margin:0 0 4px; line-height:1.5;}
+
+  .field-block{padding:6px 16px 16px;}
+  .field-label{
+    font-family:var(--mono); font-size:10.5px; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--ink-soft); margin:12px 0 5px; display:flex; align-items:center; gap:8px;
+  }
+  .field-label .tag{ padding:1px 7px; border:1px solid currentColor; font-size:9.5px; border-radius:2px; }
+  .field-label.mine{color:var(--blue);}
+  .field-label.sol{color:var(--good);}
+  .field-label.ai{color:var(--ai);}
+  textarea.answer{
+    width:100%; min-height:120px; resize:vertical; font-family:var(--sans); font-size:14px;
+    line-height:1.55; padding:11px 12px; border:1.4px solid var(--line-strong);
+    background:var(--paper); color:var(--ink);
+  }
+  textarea.answer:focus{ outline:none; border-color:var(--blue); background:#fff; }
+
+  .solbox{
+    border:1.4px solid var(--good); background:#fff; padding:12px 13px;
+    white-space:pre-wrap; font-size:13.5px; line-height:1.55;
+  }
+  .solbox.none{ border-color:var(--line-strong); color:var(--ink-soft); font-style:italic; background:var(--paper); }
+  .solbox.ai{ border-color:var(--ai); background:var(--ai-bg); }
+  .ai-note{font-family:var(--mono); font-size:10.5px; color:var(--ai); margin-top:7px; display:block;}
+  .ai-disclaim{
+    font-family:var(--mono); font-size:10px; color:var(--ai); letter-spacing:.04em;
+    border-top:1px dashed var(--ai); margin-top:10px; padding-top:7px;
+  }
+
+  .hidden{display:none !important;}
+
+  /* Klausur-Fortschritt unten */
+  .pager{
+    display:flex; gap:10px; align-items:center; justify-content:center; flex-wrap:wrap;
+    margin:6px 0 0; font-family:var(--mono); font-size:12px; color:var(--ink-soft);
+  }
+  .empty-note{
+    border:1.4px dashed var(--line-strong); padding:18px; text-align:center;
+    font-family:var(--mono); font-size:12.5px; color:var(--ink-soft); background:var(--field);
+  }
+  footer.foot{
+    margin-top:30px; font-family:var(--mono); font-size:11px; color:var(--ink-soft);
+    border-top:1px solid var(--line); padding-top:12px; line-height:1.6;
+  }
+  /* Drucken */
+  @media print{
+    body{background:#fff;} .toolbar,.tb-actions,header .stat-row{display:none;}
+    .qcard{break-inside:avoid;}
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none !important;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="masthead">
+    <p class="eyebrow">TU Berlin · IWF · Prof. Uhlmann</p>
+    <h1>Klausurtrainer Produktionstechnik II</h1>
+    <p class="sub">Frage–Antwort-System aus Fragenkatalog, Zusammenfassung & Skript</p>
+    <div class="stat-row" id="statRow"></div>
+  </header>
+
+  <!-- Startansicht: Moduswahl -->
+  <div id="home">
+    <section class="panel">
+      <p class="panel-title">Klausur generieren — eine Frage je Themengebiet</p>
+      <div class="mode-grid">
+        <button class="mode-card" id="modeExamReal">
+          <span class="mc-no">Modus 01 · A</span>
+          <span class="mc-h">Echte Klausur</span>
+          <span class="mc-d">Pro Themengebiet eine Frage — nur Fragen mit echter Musterlösung. Lösungen erscheinen erst nach „Lösungen anzeigen“.</span>
+        </button>
+        <button class="mode-card" id="modeExamAny">
+          <span class="mc-no">Modus 01 · B</span>
+          <span class="mc-h">Beliebige Klausur</span>
+          <span class="mc-d">Pro Themengebiet eine Frage — beliebig, auch ohne echte Musterlösung. Vollständige Klausurbreite.</span>
+        </button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <p class="panel-title">Einzeltraining — ein Themengebiet üben</p>
+      <p class="hint">Klick zeigt eine Frage. Erneuter Klick (Knopf „Nächste Frage“) zeigt eine neue Frage; bereits gezeigte Fragen wiederholen sich innerhalb der Session nicht.</p>
+      <div class="vl-grid" id="vlGrid"></div>
+    </section>
+  </div>
+
+  <!-- Arbeitsbereich -->
+  <div id="work" class="hidden">
+    <div class="toolbar">
+      <span class="tb-mode" id="tbMode"></span>
+      <span class="tb-actions">
+        <button class="btn ghost small" id="btnSolutions">Lösungen anzeigen</button>
+        <button class="btn ghost small" id="btnNext">Nächste Frage</button>
+        <button class="btn ghost small" id="btnHome">Zurück zum Menü</button>
+      </span>
+    </div>
+    <div id="cards"></div>
+    <div class="pager" id="pager"></div>
+  </div>
+
+  <footer class="foot">
+    Lösungen aus den bereitgestellten Dokumenten. „Echte Musterlösung“ = wörtlich aus Fragenkatalog/Zusammenfassung.
+    „KI-ergänzte Lösung“ = ausschließlich aus dem Vorlesungsskript zusammengestellt — zur Vervollständigung, nicht als Ersatz.
+    Für die Klausur gelten die Skriptinhalte als maßgeblich.
+  </footer>
+
+</div>
+
+<script>
+/* === FRAGENDATENBANK wird hier eingefügt === */
+// Fragendatenbank Produktionstechnik II
+// Felder pro Frage:
+//   id, vl (Kategorie-Key), frage,
+//   muster (echte Musterlösung aus den Dokumenten ODER null),
+//   ki (Lösung ausschließlich aus dem Vorlesungsskript, mit Quellenangabe VL+Folie)
+//
+// Kategorien-Keys:
+// vl1, vl2, vl3, vl4, vl5, vl6, vl7, vl8, vl9, vl10, vl11, vl12
+
+const KATEGORIEN = [
+  { key: "vl1",  label: "VL 1 – Fertigungssystematik" },
+  { key: "vl2",  label: "VL 2 – Urformen" },
+  { key: "vl3",  label: "VL 3 – Umformen" },
+  { key: "vl4",  label: "VL 4 – Trennen I (geom. bestimmte Schneide)" },
+  { key: "vl5",  label: "VL 5 – Trennen II (geom. unbestimmte Schneide)" },
+  { key: "vl6",  label: "VL 6 – Trennen III (Abtragen)" },
+  { key: "vl7",  label: "VL 7 – Fügen" },
+  { key: "vl8",  label: "VL 8 – Beschichten" },
+  { key: "vl9",  label: "VL 9 – Wärmebehandeln" },
+  { key: "vl10", label: "VL 10 – Fertigungsprozessketten" },
+  { key: "vl11", label: "VL 11 – Montage" },
+  { key: "vl12", label: "VL 12 – Kreislaufwirtschaft" }
+];
+
+const FRAGEN = [
+  // =================== VL 1: Fertigungssystematik ===================
+  {
+    id: "vl1-01", vl: "vl1",
+    frage: "Ordnen Sie die Fertigungstechnik schematisch in die industrielle Produktionstechnik ein.",
+    muster: null,
+    ki: "Die industrielle Produktionstechnik gliedert sich in Informationstechnik, Materialtechnik und Energietechnik. Den materiellen Prozess der Produktherstellung bilden Gewinnungs- und Aufbereitungstechnik → Verfahrenstechnik → Fertigungstechnik. Die Stoffkette verläuft dabei von Naturstoffen über Rohstoffe und Werkstoffe zu Produkten; die Fertigungstechnik steht am Ende und überführt Werkstoffe in Produkte."
+  },
+  {
+    id: "vl1-02", vl: "vl1",
+    frage: "Definieren Sie den Begriff „Fertigungstechnik“.",
+    muster: "Die Fertigungstechnik befasst sich mit:\n- der Erzeugung\n- geometrisch bestimmter, fester Körper\n- durch Wandeln des Rohstoffzustandes in den Fertigzustand\n- mittels geeigneter Fertigungsmittel und Verfahren",
+    ki: "Die Fertigungstechnik befasst sich mit der Erzeugung geometrisch bestimmter, fester Körper durch Wandeln des Rohzustandes in den Fertigzustand mittels geeigneter Fertigungsmittel und -verfahren."
+  },
+  {
+    id: "vl1-03", vl: "vl1",
+    frage: "Nennen Sie im Rahmen der Fertigungssystematik drei Gruppen von produktspezifischen Daten und je ein Beispiel. / Klassifizieren und nennen Sie die produktspezifischen Daten im Hinblick auf die Bauteilfertigung.",
+    muster: "1. Geometriebestimmende Produktdaten: Abmessungen (Höhe, Breite, Länge, Durchmesser), Form (prismatisch, rotationssymmetrisch), Lage (Parallelität, Konizität, Ebenheit, Winkligkeit)\n2. Oberflächenbestimmende Produktdaten: Oberflächenfeingestalt (Welligkeit, Rauheit, Texturierung), Randzonengestalt (Randzonengefüge, Eigenspannungen, Mikrorisse)\n3. Werkstofftechnische Produktdaten: Werkstoffspektrum (chem. Zusammensetzung, Bindungsart, Gefügebild), Werkstoffeigenschaften (mechanische, thermische, elektrische)",
+    ki: "Produktspezifische Daten gliedern sich in: (1) Geometriebestimmende Produktdaten – Abmessungen (Höhe, Breite, Länge, Durchmesser), Form (prismatisch, rotationssymmetrisch) und Lage (Parallelität, Konizität, Ebenheit, Winkligkeit); (2) Oberflächenbestimmende Produktdaten – Oberflächenfeingestalt (Welligkeit, Rauheit, Texturierung) und Randzonengestalt (Randzonengefüge, Eigenspannungen, Mikrorisse); (3) Werkstofftechnische Produktdaten – Werkstoffspektrum (chemische Zusammensetzung, Bindungsart, Gefügebild) und Werkstoffeigenschaften (mechanische, thermische, elektrische)."
+  },
+  {
+    id: "vl1-04", vl: "vl1",
+    frage: "Nennen Sie die Bindungstypen von Werkstoffen.",
+    muster: "- Atombindungen (kovalente Bindungen)\n- Ionenbindungen\n- Metallbindungen\n- Van-der-Waals-Bindungen (Adsorptionsbindungen)",
+    ki: "Man unterscheidet vier Bindungstypen: Atombindungen (kovalente Bindungen), Ionenbindungen, Metallbindungen und Van-der-Waals-Bindungen (Adsorptionsbindungen)."
+  },
+  {
+    id: "vl1-05", vl: "vl1",
+    frage: "Nennen Sie die vier Gruppen der auftragsbezogenen Produktdaten. / Für welche Zwecke werden die auftragsbezogenen Produktdaten genutzt?",
+    muster: null,
+    ki: "Die vier Gruppen der auftragsbezogenen Produktdaten sind: Stückzahl/Losgröße, Termin, Kosten/Produktpreis und besondere Qualitätsmerkmale. Sie bestimmen die Auswahl der Fertigungsverfahren (Leistungsfähigkeit und Genauigkeit), der Fertigungseinrichtungen und -systeme, der Fertigungsart, der Fertigungsablaufart sowie der Prozesskette."
+  },
+  {
+    id: "vl1-06", vl: "vl1",
+    frage: "Definieren Sie den Begriff „Fertigungsverfahren“ gem. DIN 8580. Nennen Sie die Hauptgruppen der Fertigungsverfahren und geben Sie das Hauptunterscheidungsmerkmal an.",
+    muster: "Definition (DIN 8580): Fertigungsverfahren sind alle Verfahren zur Herstellung von geometrisch bestimmten festen Körpern. Sie schließen die Verfahren zur Gewinnung erster Formen aus dem formlosen Zustand, zur Veränderung dieser Form sowie zur Veränderung der Stoffeigenschaften ein.\n\nHauptunterscheidungsmerkmal: der Stoffzusammenhalt.\nHauptgruppen:\n- Urformen (Zusammenhalt schaffen)\n- Umformen (Zusammenhalt beibehalten)\n- Trennen (Zusammenhalt vermindern)\n- Fügen (Zusammenhalt vermehren)\n- Beschichten / Stoffeigenschaft ändern",
+    ki: "Definition nach DIN 8580: Fertigungsverfahren sind alle Verfahren zur Herstellung von geometrisch bestimmten festen Körpern. Sie schließen die Verfahren zur Gewinnung erster Formen aus dem formlosen Zustand, zur Veränderung dieser Form sowie zur Veränderung der Stoffeigenschaften ein. Hauptunterscheidungsmerkmal ist der Stoffzusammenhalt. Die sechs Hauptgruppen sind Urformen (Zusammenhalt schaffen), Umformen (Zusammenhalt beibehalten), Trennen (Zusammenhalt vermindern), Fügen (Zusammenhalt vermehren), Beschichten und Stoffeigenschaft ändern."
+  },
+  {
+    id: "vl1-07", vl: "vl1",
+    frage: "Wie lösen Sie eine Fertigungsaufgabe? Nennen Sie die einzelnen Schritte und die beiden abschließenden zentralen Entscheidungen (ohne Berücksichtigung ökonomischer Aspekte).",
+    muster: "1. Analyse der geometrischen und materialbezogenen Eigenschaften des zu fertigenden Teils\n2. Ableitung eines geeigneten Wirkprinzips\n3. Auswahl eines Fertigungsverfahrens bzw. einer -variante entsprechend der erforderlichen Kinematik\n4. Festlegung einer Bearbeitungstechnologie\nAbschließende zentrale Entscheidungen:\n- Auswahl eines Fertigungssystems\n- Auswahl eines Werkzeugsystems",
+    ki: "Vorgehensweise: (1) Analyse der geometrischen und materialbezogenen Eigenschaften des zu fertigenden Teils, (2) Ableitung eines geeigneten Wirkprinzips, (3) Auswahl eines Fertigungsverfahrens bzw. einer -variante entsprechend der erforderlichen Kinematik, (4) Festlegung einer Bearbeitungstechnologie. Die beiden abschließenden zentralen Entscheidungen sind die Auswahl eines Fertigungssystems und die Auswahl eines Werkzeugsystems."
+  },
+
+  // =================== VL 2: Urformen ===================
+  {
+    id: "vl2-01", vl: "vl2",
+    frage: "Definieren Sie das Fertigungsverfahren Urformen und untergliedern Sie die Urformverfahren nach DIN 8580 in vier Gruppen. Nach welchem Kriterium werden sie eingeteilt?",
+    muster: "Definition: Urformen ist das Fertigen eines festen Körpers aus formlosem Stoff durch das Schaffen eines Zusammenhalts. Hierbei treten die Stoffeigenschaften bestimmbar in Erscheinung.\n\nEinteilungskriterium: Ausgangszustand des formlosen Stoffes.\nGruppen:\n1. Urformen aus dem gas- oder dampfförmigen Zustand\n2. Urformen aus dem flüssigen, breiigen oder pastenförmigen Zustand\n3. Urformen aus dem ionisierten Zustand durch elektrolytisches Abscheiden\n4. Urformen aus dem festen Zustand",
+    ki: "Urformen ist das Fertigen eines festen Körpers aus formlosem Stoff durch das Schaffen eines Zusammenhalts; dabei treten die Stoffeigenschaften bestimmbar in Erscheinung. Einteilungskriterium nach DIN 8580 ist der Ausgangszustand des formlosen Stoffes. Die vier Gruppen: (1) aus dem gas- oder dampfförmigen Zustand, (2) aus dem flüssigen, breiigen oder pastenförmigen Zustand, (3) aus dem ionisierten Zustand durch elektrolytisches Abscheiden, (4) aus dem festen Zustand."
+  },
+  {
+    id: "vl2-02", vl: "vl2",
+    frage: "Nennen Sie die Verfahrensschritte der Prozesskette des Feingießens.",
+    muster: "1. Spritzen der Wachsmodelle\n2. Aufbau zur Gießtraube\n3. Eintauchen in keramische Schlickermasse\n4. Besanden mit feuerfestem Material\n5. Gießform mehrmals schlickern und besanden\n6. Ausschmelzen der Wachslinge und Brennen der Gießform\n7a. Offenes Abgießen der Form / 7b. Vakuumgießen\n8. Mechanische Zerstörung der Form\n9. Abtrennen der Gussteile",
+    ki: "Verfahrensschritte des Feingießens (Gussverfahren mit verlorener Form und Modell): (1) Spritzen der Wachsmodelle, (2) Aufbau zur Gießtraube, (3) Eintauchen in keramische Schlickermasse, (4) Besanden mit feuerfestem Material, (5) Gießform mehrmals schlickern und besanden, (6) Ausschmelzen der Wachslinge und Brennen der Gießform, (7a) offenes Abgießen der Form bzw. (7b) Vakuumgießen, (8) mechanische Zerstörung der Form, (9) Abtrennen der Gussteile."
+  },
+  {
+    id: "vl2-03", vl: "vl2",
+    frage: "Welche Prozessschritte umfasst die Pulvermetallurgie?",
+    muster: "1. Erzeugung von Pulvern aus Metallen, Metalllegierungen oder -verbindungen (mechanische Verfahren, Verdüsung, chemische Verfahren)\n2. Verarbeitung der Pulver:\n   - Mischen\n   - Pressen\n   - Sintern\n→ Halbzeuge bzw. Fertigteile",
+    ki: "Die Pulvermetallurgie umfasst zunächst die Erzeugung von Pulvern aus Metallen, Metalllegierungen oder -verbindungen (mechanische Verfahren, Verdüsung, chemische Verfahren) und anschließend die Verarbeitung der Pulver durch Mischen, Pressen und Sintern. Daraus entstehen Halbzeuge bzw. Fertigteile."
+  },
+  {
+    id: "vl2-04", vl: "vl2",
+    frage: "Definieren Sie Sintern.",
+    muster: "Sintern ist die Verfestigung eines Pulvers unter Hitzeeinwirkung ohne vollständiges Aufschmelzen der beteiligten Komponenten.",
+    ki: "Sintern ist die Verfestigung eines Pulvers unter Hitzeeinwirkung ohne vollständiges Aufschmelzen der beteiligten Komponenten."
+  },
+  {
+    id: "vl2-05", vl: "vl2",
+    frage: "Nennen Sie die Hauptgruppen der Polymerwerkstoffe und je ein Werkstoffbeispiel. / Unterteilen Sie die Polymerwerkstoffe nach DIN 7724 in drei Gruppen.",
+    muster: "1. Duroplaste: Epoxidharze (EP), ungesättigte Polyesterharze (UP)\n2. Thermoplaste: Polyethylen (PE), Polyvinylchlorid (PVC), Polystyrol (PS), PET, PP\n3. Elastomere: Siliconkautschuk, Naturkautschuk",
+    ki: "Die drei Hauptgruppen der Polymerwerkstoffe: (1) Duroplaste, z. B. Epoxidharz (EP); (2) Thermoplaste, z. B. Polyamid (PA); (3) Elastomere, z. B. Naturkautschuk (NR)."
+  },
+  {
+    id: "vl2-06", vl: "vl2",
+    frage: "Wie werden keramische Werkstoffe eingeteilt? Nennen Sie je zwei Beispiele.",
+    muster: "1. Silikatkeramik: Porzellan, Steatit, Cordierit, Mullit\n2. Oxidkeramik: Aluminiumoxid, Magnesiumoxid, Titanoxid, Zirkonoxid\n3. Nichtoxidkeramik: Siliciumcarbid, Siliciumnitrid, Bornitrid, Borcarbid",
+    ki: "Keramische Werkstoffe werden nach ihrer chemischen Zusammensetzung eingeteilt in: Silicatkeramik (z. B. SiO2), Oxidkeramik (z. B. Al2O3, ZrO2) und Nichtoxidkeramik (z. B. Si3N4, SiSiC)."
+  },
+  {
+    id: "vl2-07", vl: "vl2",
+    frage: "Beschreiben Sie die allgemeine Herstellungsroute für keramische Bauteile (keramische Route). Nennen Sie zu den jeweiligen Teilprozessen mind. zwei Verfahren.",
+    muster: "1. Natürliche und synthetische Rohstoffe\n2. Masseaufbereitung → Mahlen, Mischen, Filtrieren, Granulieren, Sprühtrocknen\n3. Formgebung → Extrudieren, Spritzgießen, Trocken-/Nasspressen, Schlickergießen\n4. Brandvorbereitung → Trocknen, Entbindern, Verglühen, Glasieren\n5. Sintern → Reaktionssintern in versch. Gasatmosphären, Heißpressen, Heißisostatisches Pressen\n6. Endbearbeiten → Schneiden, Bohren, Schleifen, Läppen, Honen, Polieren\n7. Endprüfung",
+    ki: "Keramische Route: (1) natürliche und synthetische Rohstoffe; (2) Masseaufbereitung – Mahlen, Mischen, Filtrieren, Granulieren, Sprühtrocknen; (3) Formgebung – Extrudieren, Spritzgießen, Trocken-/Nasspressen, isostatisches Pressen, Schlickergießen, Grünbearbeitung; (4) Brandvorbereitung – Trocknen, Entbindern, Verglühen, Glasieren; (5) Sintern – Reaktionssintern in verschiedenen Gasatmosphären, Heißpressen, heißisostatisches Pressen; (6) Endbearbeiten – Schneiden/Lasertrennen, Bohren, Schleifen/Läppen/Honen, Polieren; (7) Endprüfung."
+  },
+  {
+    id: "vl2-08", vl: "vl2",
+    frage: "Nennen Sie die Arbeitsschritte und Einsatzgebiete des Selektiven Laser Sinterns (SLS). Welche Werkstoffe lassen sich verarbeiten?",
+    muster: "Arbeitsschritte:\n- Übertragen der Schichtinformation über Laserscanner in das Pulver, Versintern der Partikel über Laser\n- Schaffung einer zusammenhängenden Schicht und Verbund mit darunterliegender Schicht\n- Absenken des Baubereichs (üblicherweise um 0,1 mm) und Anheben eines Vorratsbehälters\n- Auftragen des Pulvers mit einer gegenläufigen Rolle/Rakel\n- Versintern der nächsten Schicht\n- Nicht versintertes Restpulver hat stützende Funktion im Baubereich\n\nWerkstoffe: Thermoplaste (PA, PS, PC, PEEK); Formsand, Keramiken nur mit thermischem/thermoplastischem Binder möglich.\n\nEinsatzgebiete: Herstellung von Prototypen und funktionalen Werkstücken, Ersatzteile oder Kleinserien.",
+    ki: "Arbeitsschritte SLS: Scannen der Schichtinformation und Versintern der Partikel über den Laser, Schaffung einer zusammenhängenden Schicht mit Verbund zur darunterliegenden Schicht, Absenken des Baubereichs und Anheben eines Vorratsbehälters, Auftragen des Pulvers mit gegenläufiger Rolle, Versintern der nächsten Schicht; nicht versintertes Restpulver wirkt stützend. Werkstoffe: thermoplastische Kunststoffe (PA, PS, PC, PEEK); Formsand und Keramiken nur mit thermoplastischem Binder. Einsatzgebiete: Prototypen, funktionale Werkstücke, Ersatzteile und Kleinserien."
+  },
+
+  // =================== VL 3: Umformen ===================
+  {
+    id: "vl3-01", vl: "vl3",
+    frage: "Nennen Sie vier Fertigungsverfahren des Umformens nach DIN 8582.",
+    muster: "- Druckumformen\n- Zugdruckumformen\n- Zugumformen\n- Biegeumformen\n- Schubumformen",
+    ki: "Umformen wird nach DIN 8582 eingeteilt in: Druckumformen (z. B. Walzen, Freiformen, Gesenkformen, Eindrücken, Durchdrücken), Zugdruckumformen (z. B. Durchziehen, Tiefziehen, Kragenziehen, Drücken, Knickbauchen), Zugumformen (Längen, Weiten, Tiefen), Biegeumformen (Biegen mit geradliniger bzw. drehender Werkzeugbewegung) und Schubumformen (Verschieben, Verdrehen)."
+  },
+  {
+    id: "vl3-02", vl: "vl3",
+    frage: "Definieren Sie den Begriff „Umformen“ nach DIN 8580.",
+    muster: "Umformen ist die gezielte Änderung der Form, der Oberfläche und der Werkstoffeigenschaften eines Werkstücks unter Beibehaltung von Masse und Stoffzusammensetzung (Stoffzusammenhang).",
+    ki: "Umformen ist die gezielte Änderung der Form, der Oberfläche und der Werkstoffeigenschaften eines Bauteils unter Beibehaltung von Masse und Stoffzusammenhang."
+  },
+  {
+    id: "vl3-03", vl: "vl3",
+    frage: "Nennen Sie die Haupteinflussgrößen auf die Genauigkeit bei der Massivumformung und je ein Beispiel für jede Größe.",
+    muster: "- Maschine → Arbeitsvermögen, Auffederung, Führung\n- Werkstoff → physikalisch-chemische Eigenschaften (führen zu Kraftschwankungen)\n- Halbzeug → Maßgenauigkeit, Zuschnitt\n- Verfahren → Kaltumformen, Warmumformen\n- Arbeitsablauf → Ausgangsform, Zwischenform, Endform\n- Werkzeug → Herstellgenauigkeit, Verschleiß, Federung",
+    ki: "Haupteinflussgrößen auf die Genauigkeit bei der Massivumformung: Maschine (Arbeitsvermögen, Auffederung, Führung), Werkstoff (physikalisch-chemische Eigenschaften), Halbzeug (Maßgenauigkeit, Zuschnitt), Verfahren (Kalt-/Warmumformen), Arbeitsablauf (Ausgangs-, Zwischen-, Endform), Werkzeug (Herstellgenauigkeit, Verschleiß, Federung)."
+  },
+  {
+    id: "vl3-04", vl: "vl3",
+    frage: "Nennen Sie die Möglichkeiten zur Verringerung der Schnittkraft beim Scherschneiden von Blechen.",
+    muster: "- Vergrößerung des Schneidspaltes (Maßungenauigkeiten nehmen zu)\n- Verringerung der wirksamen Schneidenlänge durch speziell geschliffene Stempel (Schräger Schliff oder Dachschliff) bzw. abgesetzte Stempel\n(Hinweis: Schnittkraft ergibt sich aus der Schnittfläche und der Zugfestigkeit des Werkstoffes.)",
+    ki: "Die Schnittkraft ergibt sich aus der Schnittfläche und der Zugfestigkeit des Werkstoffes. Möglichkeiten der Verringerung: Vergrößerung des Schneidspaltes (Maßungenauigkeiten nehmen zu) und Verringerung der wirksamen Schneidenlänge durch speziell geschliffene Stempel (schräger Schliff oder Dachschliff) bzw. abgesetzte Stempel."
+  },
+  {
+    id: "vl3-05", vl: "vl3",
+    frage: "Nach welchen drei Funktionsprinzipien werden Umformmaschinen eingeteilt? Nennen Sie zu jedem Prinzip das vorwiegende Einsatzgebiet.",
+    muster: "- Kraftgebunden: konstante Umformkraft über den gesamten Umformweg → vorwiegend Massiv- und Blechumformung\n- Energiegebunden: setzen das gespeicherte Arbeitsvermögen je Umformschritt um, formen bis die Energie verbraucht ist → vorwiegend Massivumformung\n- Weggebunden: fest vorgegebene Weg-Zeit-Charakteristik (z. B. Exzenter-, Kurbel-, Kniehebelpressen) → vorwiegend Blechumformung",
+    ki: "Drei Funktionsprinzipien: Kraftgebunden (konstante Umformkraft über den gesamten Umformweg, vorwiegend Massiv- und Blechumformung), Energiegebunden (setzen das gespeicherte Arbeitsvermögen je Umformschritt in Umformarbeit um bis die Energie verbraucht ist, vorwiegend Massivumformung), Weggebunden (fest vorgegebene Weg-Zeit-Charakteristik, z. B. Exzenter-, Kurbel- und Kniehebelpressen, vorwiegend Blechumformung)."
+  },
+  {
+    id: "vl3-06", vl: "vl3",
+    frage: "Welche Kenngrößen für die Auswahl von Umformmaschinen gibt es? Nennen Sie je ein Beispiel.",
+    muster: "- Kraftkenngrößen → max. Presskraft, Niederhaltekraft, Auswerferkraft\n- Geometrische Kenngrößen → Hub, Werkzeugeinbauhöhe, nutzbare Tisch- und Stößelfläche\n- Zeitkenngrößen → Einzelhubzahl, Dauerhubzahl, Berührzeit\n- Genauigkeitskenngrößen → Ebenheit der Werkzeugaufspannfläche, Spiel in Führungen und Antrieb\n- Energiekenngrößen → Arbeitsvermögen, Federarbeit, Drehzahlabfall\n- Bedingungen am Arbeitsplatz → Gewicht, Abmessungen, Fundament",
+    ki: "Kenngrößen zur Auswahl von Umformmaschinen: Kraftkenngrößen (z. B. max. Presskraft, Niederhalte-/Auswerferkraft), geometrische Kenngrößen (z. B. Hub, Werkzeugeinbauhöhe, nutzbare Tisch- und Stößelfläche), Zeitkenngrößen (z. B. Einzelhubzahl, Dauerhubzahl, Berührzeit), Genauigkeitskenngrößen (z. B. Ebenheit der Werkzeugaufspannfläche, Spiel in Führungen und Antrieb), Energiekenngrößen (z. B. Arbeitsvermögen, Federarbeit, Drehzahlabfall) und Bedingungen am Arbeitsplatz (z. B. Gewicht, Abmessungen, Fundament)."
+  },
+
+  // =================== VL 4: Trennen I (geom. bestimmte Schneide) ===================
+  {
+    id: "vl4-01", vl: "vl4",
+    frage: "Definieren Sie die Begriffe „Trennen“ und „Spanen“. Geben Sie die charakteristischen Merkmale des Spanens an.",
+    muster: "Trennen: Fertigen durch Ändern der Form eines festen Körpers, wobei der Zusammenhalt örtlich aufgehoben, d. h. im Sinne des Zusammenhalts im Ganzen vermindert wird.\n\nSpanen: Trennen, bei dem von einem Werkstück mit Hilfe der Schneiden eines Werkzeuges Werkstoffschichten in Form von Spänen zur Änderung der Werkstückform und/oder Werkstückoberfläche mechanisch abgetrennt werden.\n\nCharakteristische Merkmale des Spanens:\n- mechanisches Wirkprinzip\n- Späne (geometrisch unbestimmte Werkstoffteilchen) entstehen\n- Schneidengeometrie, Lage und Anzahl sind bestimmt oder unbestimmt\n- Form entsteht durch Abbilden der Werkzeuggeometrie, gesteuerte Relativbewegung oder eine Kombination beider Varianten",
+    ki: "Trennen ist Fertigen durch Ändern der Form eines festen Körpers, wobei der Zusammenhalt örtlich aufgehoben (im Ganzen vermindert) wird. Spanen ist Trennen, bei dem von einem Werkstück mit Hilfe der Schneiden eines Werkzeuges Werkstoffschichten in Form von Spänen zur Änderung der Werkstückform und/oder -oberfläche mechanisch abgetrennt werden. Charakteristische Merkmale: mechanisches Wirkprinzip, Späne entstehen, Schneidengeometrie/Lage/Anzahl sind bestimmt oder unbestimmt, Form entsteht durch Abbilden der Werkzeuggeometrie, gesteuerte Relativbewegung oder Kombination."
+  },
+  {
+    id: "vl4-02", vl: "vl4",
+    frage: "Unterteilen Sie das Trennen in sechs Gruppen gemäß DIN 8580 (physikalisches Wirkprinzip).",
+    muster: "- Zerteilen\n- Spanen mit geometrisch bestimmter Schneide\n- Spanen mit geometrisch unbestimmter Schneide\n- Abtragen\n- Zerlegen\n- Reinigen",
+    ki: "Trennen wird gemäß DIN 8580 in sechs Gruppen unterteilt: Zerteilen, Spanen mit geometrisch bestimmter Schneide, Spanen mit geometrisch unbestimmter Schneide, Abtragen, Zerlegen und Reinigen."
+  },
+  {
+    id: "vl4-03", vl: "vl4",
+    frage: "Wie erfolgt die Trennung der Werkstoffbereiche beim Spanen mit geometrisch bestimmter Schneide? Welche Voraussetzungen müssen für den Trennvorgang erfüllt sein?",
+    muster: "Ablauf:\n- Durchdringung von Werkzeug und Werkstück (Schneidkeil dringt in den Werkstückwerkstoff ein)\n- Elastische und plastische Verformung\n- Fließen des Werkstoffes (kritische Schubspannung setzt ein)\n- Ausbildung eines Spans\n- Ablaufen des Spans über die Spanfläche des Schneidkeils\n\nVoraussetzungen:\n- Härte des Werkzeugwerkstoffs muss höher sein als die Härte des Werkstückstoffs\n- Überschreitung der minimalen Eindringtiefe",
+    ki: "Ablauf: Durchdringung von Werkzeug und Werkstück (Schneidkeil dringt ein), elastische und plastische Verformung, Fließen des Werkstoffes (Einsetzen der kritischen Schubspannung), Ausbildung eines Spans, Ablaufen des Spans über die Spanfläche des Schneidkeils. Voraussetzungen: Härte des Werkzeugwerkstoffs höher als die des Werkstückstoffs sowie Überschreitung der minimalen Eindringtiefe."
+  },
+  {
+    id: "vl4-04", vl: "vl4",
+    frage: "Welche Spanarten werden unterschieden und welches sind die wichtigsten Einflussgrößen auf deren Entstehung?",
+    muster: "Spanarten:\n- Fließspan\n- Lamellenspan\n- Scherspan\n- Reißspan\n\nEinflussgrößen auf die Entstehung:\n- Werkstückstoff (Umformbarkeit)\n- geometrische und kinematische Parameter",
+    ki: "Spanarten: Fließspan, Lamellenspan, Scherspan, Reißspan. Wichtigste Einflussgrößen auf deren Entstehung: Werkstückstoff (Umformbarkeit) sowie geometrische und kinematische Parameter."
+  },
+  {
+    id: "vl4-05", vl: "vl4",
+    frage: "Nennen Sie die fünf Schneidstoffarten und nennen Sie drei Anforderungen, die moderne Schneidstoffe erfüllen müssen.",
+    muster: "Schneidstoffarten:\n- Werkzeug- und Schnellarbeitsstähle (handwerklicher Bereich, Zähigkeit, gute Bearbeitbarkeit)\n- Hartmetalle (höhere Warmfestigkeit und Härte bei ausreichender Zähigkeit/Bearbeitbarkeit)\n- Cermets (verbinden Vorteile von Hartmetall und Keramik)\n- keramische Schneidstoffe (Al2O3, Si3N4, geringe Kosten)\n- hochharte polykristalline Schneidstoffe (cBN, PKD, sehr hohe Härte und Verschleißfestigkeit, teuer, lange Standzeit)\n\nAnforderungen (drei nennen):\n- Härte und Druckfestigkeit\n- Biegesteifigkeit und Zähigkeit\n- Bearbeitbarkeit\n- Wärmeleitfähigkeit\n- Korrosions- und Oxidationsbeständigkeit",
+    ki: "Fünf Schneidstoffarten: Werkzeug-/Schnellarbeitsstähle, Hartmetalle, Cermets, keramische Schneidstoffe (Al2O3, Si3N4), hochharte polykristalline Schneidstoffe (cBN, PKD). Anforderungen an moderne Schneidstoffe (drei): Härte und Druckfestigkeit, Biegesteifigkeit und Zähigkeit, Bearbeitbarkeit, Wärmeleitfähigkeit, Korrosions- und Oxidationsbeständigkeit."
+  },
+  {
+    id: "vl4-06", vl: "vl4",
+    frage: "Nennen Sie die fünf Hauptkomponenten einer modernen Drehmaschine.",
+    muster: "- Werkzeugsystem\n- Werkzeugträger\n- Werkstückantrieb\n- Werkstückspannung\n- Vorschubantriebe\n(weiterhin: Werkstückabstützung)",
+    ki: "Hauptkomponenten einer modernen Drehmaschine: Werkzeugsystem, Werkzeugträger, Werkstückantrieb, Werkstückspannung, Vorschubantriebe (sowie Werkstückabstützung)."
+  },
+  {
+    id: "vl4-07", vl: "vl4",
+    frage: "Geben Sie drei maschinenseitige Möglichkeiten zur Steigerung der Produktivität von Zerspanprozessen an.",
+    muster: "- Mehrschnitt- und Mehrstückbearbeitung (mehrspindlige Vielschlittendrehautomaten)\n- Komplettbearbeitung (in einer Aufspannung)\n- automatisierte Werkzeug- und Werkstückwechsel (Steigerung des Automatisierungsgrades)",
+    ki: "Maschinenseitige Möglichkeiten zur Produktivitätssteigerung: Mehrstück- und Mehrschnittbearbeitung (z. B. durch mehrspindlige Vielschlittendrehautomaten), Komplettbearbeitung in einer Aufspannung, Steigerung des Automatisierungsgrades durch automatisierten Werkzeug- und Werkstückwechsel."
+  },
+  {
+    id: "vl4-08", vl: "vl4",
+    frage: "Was versteht man unter Hochgeschwindigkeitsbearbeitung? Nennen Sie je zwei Vor- und Nachteile.",
+    muster: "Definition: Ab einer ca. 10-fach größeren (Zerspan-)Schnittgeschwindigkeit als bei normalen Zerspanvorgängen spricht man von Hochgeschwindigkeitszerspanung (HSC).\n\nVorteile:\n- Reduzierung der Zerspankräfte (höhere Genauigkeit, dünnwandige Bauteile möglich)\n- Bessere Oberflächengüten\n- Geringere thermische Belastung (Wärme über Späne abgeführt)\n- Reduzierung der Haupt- und Durchlaufzeiten\n\nNachteile:\n- Hohe Anforderungen an Maschinen und Baugruppen\n- Hohe Anforderungen an Sicherheitsvorrichtungen aufgrund hoher Drehzahlen\n- Erhöhung der Nebenzeiten aufgrund reduzierter Standzeit des Werkzeugs",
+    ki: "Hochgeschwindigkeitsbearbeitung (HSC) beginnt üblicherweise bei einer rund 10-fach höheren Schnittgeschwindigkeit gegenüber herkömmlichen Werten. Vorteile: Reduktion der Zerspankräfte, bessere Oberflächengüte, geringere thermische Belastung, Reduktion der Haupt- und Durchlaufzeiten. Nachteile: hohe Anforderungen an Maschinen und Baugruppen, hohe Anforderungen an Sicherheitsvorrichtungen wegen höherer Drehzahlen, Erhöhung der Nebenzeiten aufgrund geringerer Werkzeugstandzeiten."
+  },
+  {
+    id: "vl4-09", vl: "vl4",
+    frage: "Unterteilen Sie das Fräsen in sechs Gruppen gemäß DIN 8589 Teil 3.",
+    muster: "- Planfräsen\n- Rundfräsen\n- Schraubfräsen\n- Wälzfräsen\n- Profilfräsen\n- Formfräsen",
+    ki: "Fräsen wird nach DIN 8589 Teil 3 in sechs Gruppen unterteilt: Planfräsen, Rundfräsen, Schraubfräsen, Wälzfräsen, Profilfräsen und Formfräsen."
+  },
+  {
+    id: "vl4-10", vl: "vl4",
+    frage: "Erläutern Sie den Unterschied zwischen Profil- und Formfräsen.",
+    muster: "Profilfräsen: Es wird ein Werkzeug mit werkstückgebundener Form verwendet (Beispiele: Fräsen von Nuten, Radien, Zahnflanken oder Führungsbahnen).\n\nFormfräsen: Die gewünschte Werkstückgeometrie wird durch eine gesteuerte Relativbewegung zwischen Werkzeug und Werkstück erzeugt (heute größtenteils CNC-Fräsmaschinen).",
+    ki: "Beim Profilfräsen wird ein Werkzeug mit werkstückgebundener Form verwendet. Beim Formfräsen wird die Werkstückgeometrie durch eine gesteuerte Relativbewegung zwischen Werkstück und Werkzeug erzeugt."
+  },
+  {
+    id: "vl4-11", vl: "vl4",
+    frage: "Erläutern Sie die Unterschiede zwischen 3-Achs- und 5-Achsfräsen.",
+    muster: "- 3-Achsen-Fräser: nur 3 translatorische Achsen (gesteuert wird die Fräserspitze)\n- 5-Achsen-Fräser: 3 translatorische und 2 rotatorische Achsen bei simultaner, kontinuierlicher Bewegung (gesteuert werden Fräserspitze und Fräserausrichtung relativ zum Werkstück)\n- Beim 5-Achs-Fräsen: Vergrößerung des Zeilenabstands bei vorgegebener Rillentiefe → Reduktion der Fräsbahnen → Reduktion der Fräszeit\n- Komplexe Bauteile in einer Aufspannung bearbeitbar, höhere geometrische Genauigkeiten, Verwendung preiswerter Standardwerkzeuge, jedoch CAD/CAM-Programm notwendig",
+    ki: "3-Achsen-Fräser: nur 3 translatorische Achsen, gesteuert wird die Fräserspitze. 5-Achsen-Fräser: 3 translatorische und 2 rotatorische Achsen, simultan und kontinuierlich, Fräserspitze und Fräserausrichtung werden relativ zum Werkstück gesteuert. Vorteile der 5 Achsen: größerer Zeilenabstand bei vorgegebener Rillentiefe (weniger Fräsbahnen, kürzere Fräszeit), Bearbeitung komplexer Bauteile in einer Aufspannung, höhere geometrische Genauigkeit, preiswerte Standardwerkzeuge – jedoch CAD/CAM-Programm notwendig."
+  },
+
+  // =================== VL 5: Trennen II (geom. unbestimmte Schneide) ===================
+  {
+    id: "vl5-01", vl: "vl5",
+    frage: "Skizzieren Sie den Gefügeaufbau einer konventionellen Schleifscheibe und erläutern Sie die Aufgaben der einzelnen Bestandteile.",
+    muster: "Bestandteile (Skizze): Korn, Bindung/Bindungsbrücke, Pore; Kenngrößen Kornabstand und Brückenlänge. Volumina: V_ges = V_K (Kornvolumen) + V_B (Bindungsvolumen) + V_P (Porenvolumen).\n\nAufgaben:\n- Bindung: Halten der Schleifkörner; Freigabe der Schleifkörner bei Erreichen eines bestimmten Verschleißzustandes, sodass das nachfolgende scharfe Korn zum Eingriff kommt.\n- Korn: Abtrennung des Werkstückwerkstoffs unter nichtständiger Berührung zwischen Werkstück und Schleifkorn.\n- Pore: Spanraum / Aufnahme der Späne.",
+    ki: "Eine konventionelle Schleifscheibe besteht aus Korn, Bindung (mit Bindungsbrücken) und Poren; Kenngrößen sind Kornabstand und Brückenlänge, das Gesamtvolumen setzt sich aus Korn-, Bindungs- und Porenvolumen zusammen (V_ges = V_K + V_B + V_P). Aufgaben: Die Bindung hält die Schleifkörner und gibt sie bei Erreichen eines bestimmten Verschleißzustandes frei, damit ein nachfolgendes scharfes Korn zum Eingriff kommt; das Korn trennt den Werkstoff unter nichtständiger Berührung ab; die Pore dient als Spanraum."
+  },
+  {
+    id: "vl5-02", vl: "vl5",
+    frage: "Welche Aufgabe hat die Schleifscheibenbindung? Wie ist die Härte einer Schleifscheibe definiert?",
+    muster: "Bindung: Halten der Schleifkörper und Freigeben der Schleifkörner nach Erreichen eines bestimmten Verschleißgrades.\n\nHärte: Die Härte einer Schleifscheibe ist als Widerstand gegen den Ausbruch von Schleifkörnern (Kornausbruch) definiert.",
+    ki: "Die Schleifscheibenbindung hält die Schleifkörner und gibt sie bei Verschleiß frei. Die Härte einer Schleifscheibe ist definiert als Widerstand gegen den Kornausbruch (Ausbruch von Schleifkörnern)."
+  },
+  {
+    id: "vl5-03", vl: "vl5",
+    frage: "Nennen Sie vier gebräuchliche abrasive Stoffe (Schleifmittel) und je eine vorzugsweise bearbeitete Werkstoffgruppe.",
+    muster: "- Elektrokorund (Al2O3): langspanende Werkstoffe mit hoher Zugfestigkeit (unlegierte, ungehärtete und gehärtete Stähle, Stahlguss)\n- Siliciumcarbid (SiC): kurzspanende Werkstoffe mit niedriger Zugfestigkeit (Grauguss, Hartmetalle, NE-Metalle, nichtmetallische Werkstoffe)\n- Sol-Gel-Korund: langspanende Werkstoffe mit hoher Zugfestigkeit bei höheren Schnittgeschwindigkeiten und Zerspanvolumina\n- Kubisch-kristallines Bornitrid (cBN): schwer zerspanbare Schnellarbeitsstähle mit hohem Karbidanteil sowie Nickelbasislegierungen\n- Diamant: Hartmetall, Keramik, Glas, Beton, Naturstein, Kunststoff, Halbleiterwerkstoffe (nicht für niedriglegierte, kohlenstoffarme Stähle wegen Affinität zu Eisen)",
+    ki: "Schleifmittel und bevorzugte Werkstoffgruppen: Elektrokorund (Al2O3) für langspanende Werkstoffe hoher Zugfestigkeit (z. B. Stähle, Stahlguss); Siliciumcarbid (SiC) für kurzspanende Werkstoffe niedriger Zugfestigkeit (z. B. Grauguss, Hartmetalle, NE-Metalle); Sol-Gel-Korund für langspanende Werkstoffe hoher Zugfestigkeit bei hohen Schnittgeschwindigkeiten; kubisch-kristallines Bornitrid (cBN) für schwer zerspanbare Schnellarbeitsstähle und Nickelbasislegierungen; Diamant für Hartmetall, Keramik, Glas, Beton (nicht für kohlenstoffarme Stähle wegen Eisenaffinität)."
+  },
+  {
+    id: "vl5-04", vl: "vl5",
+    frage: "Nennen Sie drei Bindungsarten für Schleifscheiben und je ein charakterisierendes Merkmal.",
+    muster: "- Kunstharzbindung: geringe Bearbeitungskräfte, niedrige Anschaffungskosten, hohe Oberflächengüten\n- Keramikbindung: hohe Anschaffungskosten, komplexe Schleifscheibenprofile, Schleifprozesse im Selbstschärfbereich\n- Gesinterte Metallbindung: lange Profilstandzeit, geringer Verschleiß, hohe Bearbeitungskräfte, hohe Zerspanvolumina möglich\n- Galvanische Bindung: instationäres Verhalten, lange Profilstandzeit, geringer Verschleiß, komplexe Profile, hohe Zerspanvolumina",
+    ki: "Bindungsarten und Merkmale: Kunstharzbindung (geringe Bearbeitungskräfte, hohe Oberflächengüten, geringe Anschaffungskosten); Keramikbindung (Bearbeitungskräfte/Rautiefe einstellbar, komplexe Profile, Selbstschärfbereich, hohe Anschaffungskosten); gesinterte Metallbindung (hohe Bearbeitungskräfte und Zerspanvolumina, lange Profilstandzeit, geringer Verschleiß); galvanische Bindung (instationäres Prozessverhalten, lange Profilstandzeit, geringer Verschleiß, komplexe Profile, hohe Zerspanvolumina)."
+  },
+  {
+    id: "vl5-05", vl: "vl5",
+    frage: "Nennen Sie vier Arten von Kornverschleiß.",
+    muster: "- Druckerweichung\n- Absplitterung von Kristallgruppen\n- teilweiser Kornausbruch\n- vollkommener Kornausbruch",
+    ki: "Vier Arten von Kornverschleiß: Druckerweichung, Absplitterung von Kristallgruppen, teilweiser Kornausbruch und vollkommener Kornausbruch."
+  },
+  {
+    id: "vl5-06", vl: "vl5",
+    frage: "Was versteht man in der Schleiftechnik unter „Konditionieren“? Erläutern Sie den Begriff anhand der Unterverfahren und der jeweils verfolgten Ziele.",
+    muster: "Konditionieren umfasst alle Prozesse, die der Schaffung oder Regeneration der Schleiffähigkeit von Schleifkörpern dienen. Es beinhaltet das Profilieren, das Schärfen und das Reinigen der Schleifkörper.\n\nUnterverfahren und Ziele:\n- Abrichten = Profilieren + Schärfen\n  • Profilieren (Makrostruktur): Herstellung von Rundlauf und Scheibenprofil; beabsichtigt ist die Veränderung von Korn und Bindung.\n  • Schärfen (Mikrostruktur): Erzeugen der Topographie; beabsichtigt ist das Zurücksetzen der Bindung.\n- Reinigen (Mikrostruktur): Beseitigen von Spänen aus dem Spanraum; keine Veränderung der Schleifscheibe beabsichtigt.",
+    ki: "Konditionieren fasst alle Prozesse zusammen, die der Schaffung oder Regeneration der Schleiffähigkeit von Schleifkörpern dienen; es umfasst Profilieren, Schärfen und Reinigen. Abrichten besteht aus Profilieren (Makrostruktur: Herstellung von Rundlauf und Scheibenprofil, beabsichtigte Veränderung von Korn und Bindung) und Schärfen (Mikrostruktur: Erzeugen der Topographie, Zurücksetzen der Bindung). Reinigen (Mikrostruktur) beseitigt Späne aus dem Spanraum, ohne Veränderung der Schleifscheibe."
+  },
+  {
+    id: "vl5-07", vl: "vl5",
+    frage: "Nennen Sie die zwei Unterverfahren beim Planschleifen und geben Sie die jeweiligen Vorteile an. / Beschreiben Sie Pendel- und Tiefschleifen.",
+    muster: "Pendelschleifen (Längs-Umfangs-Planschleifen):\n+ geringere Temperaturen\n+ geringere Schleifkräfte\n\nTiefschleifen (Längs-Umfangs-Planschleifen):\n+ bessere Oberflächengüten\n+ kürzere Schleifzeiten\n+ geringerer Schleifscheibenverschleiß",
+    ki: "Zwei Verfahrensvarianten beim Planschleifen: Pendelschleifen (Längs-Umfangs-Planschleifen) mit den Vorteilen geringerer Temperaturen und geringerer Schleifkräfte; Tiefschleifen mit den Vorteilen besserer Oberflächengüte, kürzerer Schleifzeiten und geringerem Schleifscheibenverschleiß."
+  },
+  {
+    id: "vl5-08", vl: "vl5",
+    frage: "Skizzieren Sie den Aufbau eines konventionellen Schleifbandes und geben Sie die einzelnen Bestandteile an.",
+    muster: "Bestandteile eines konventionellen Schleifbandes:\n- Schleifmittel (Schleifkörner)\n- Schleifaktive Wirkstoffe\n- Deckbindemittel\n- Grundbindemittel\n- Unterlage\n- Verbindungsstelle",
+    ki: "Ein konventionelles Schleifband besteht aus: Unterlage, Grundbindemittel, Schleifmittel (Schleifkörner), schleifaktiven Wirkstoffen, Deckbindemittel sowie der Verbindungsstelle."
+  },
+  {
+    id: "vl5-09", vl: "vl5",
+    frage: "Definieren Sie das Honen nach DIN 8589 T14.",
+    muster: "Honen ist Spanen mit geometrisch unbestimmten Schneiden, wobei die vielschneidigen Werkzeuge eine aus zwei Komponenten bestehende Schnittbewegung ausführen, von denen mindestens eine Komponente hin- und hergehend ist, sodass die bearbeitete Oberfläche sich definiert überkreuzende Spuren aufweist.",
+    ki: "Honen ist Spanen mit geometrisch unbestimmten Schneiden, wobei die vielschneidigen Werkzeuge eine aus zwei Komponenten bestehende Schnittbewegung ausführen, von denen mindestens eine hin- und hergehend ist, sodass die bearbeitete Oberfläche sich definiert überkreuzende Spuren aufweist."
+  },
+  {
+    id: "vl5-10", vl: "vl5",
+    frage: "Nennen Sie jeweils drei verfahrensspezifische Vor- und Nachteile des Läppens.",
+    muster: "Vorteile:\n- kaum Einschränkungen hinsichtlich Werkstoff und Größe des Werkstücks\n- keine gerichteten Bearbeitungsspuren / isotrope Oberflächenstrukturen\n- geringe Bearbeitungstemperaturen und -kräfte\n- gleichmäßige Beanspruchung des Werkzeugs/Werkstücks durch flächenhaften Eingriff\n- kleine Oberflächenrauheiten, spannungsfreie Werkstückaufnahme\n\nNachteile:\n- nur einfache Geometrien bearbeitbar\n- hoher Kornverbrauch\n- starke Schmutzentstehung; Läppschlamm ist Sondermüll\n- vergleichsweise geringe Abtrennraten",
+    ki: "Vorteile des Läppens: kaum Einschränkungen bei Werkstoff und Werkstückgröße, keine gerichteten Bearbeitungsspuren (isotrope Oberflächen), geringe Bearbeitungstemperaturen und -kräfte, gleichmäßige Beanspruchung durch flächenhaften Eingriff, kleine Oberflächenrauheiten. Nachteile: nur einfache Geometrien bearbeitbar, hoher Kornverbrauch, starke Schmutzentstehung (Läppschlamm ist Sondermüll), vergleichsweise geringe Abtrennraten."
+  },
+
+  // =================== VL 6: Trennen III (Abtragen) ===================
+  {
+    id: "vl6-01", vl: "vl6",
+    frage: "Definieren Sie den Begriff „Abtragen“ und unterteilen Sie das Fertigungsverfahren nach physikalischem Wirkprinzip. Geben Sie je ein Verfahrensbeispiel an.",
+    muster: "Abtragen ist Fertigen durch Abtrennen von Stoffteilchen von einem festen Körper auf nichtmechanischem Weg. Es bezieht sich sowohl auf das Entfernen von Werkstoffschichten als auch auf das Abtrennen von Werkstückteilen (genutzt für Werkstoffe mit hoher Härte und/oder Festigkeit).\n\n- Chemisches Abtragen → Ätzabtragen, thermisch-chemisches Abtragen/Entgraten\n- Thermisches Abtragen → thermisches Abtragen durch festen Körper, durch Flüssigkeit, durch Gas/Strahl\n- Elektrochemisches Abtragen → elektrochemisches Formabtragen, elektrochemisches Ätzen",
+    ki: "Abtragen ist Fertigen durch Abtrennen von Stoffteilchen von einem festen Körper auf nichtmechanischem Weg; es umfasst das Entfernen von Werkstoffschichten und das Abtrennen von Werkstückteilen. Untergliederung nach physikalischem Wirkprinzip: chemisches Abtragen (z. B. Ätzabtragen), thermisches Abtragen (z. B. thermisches Abtragen durch festen Körper, Flüssigkeit oder Strahl) und elektrochemisches Abtragen (z. B. elektrochemisches Formabtragen, elektrochemisches Ätzen)."
+  },
+  {
+    id: "vl6-02", vl: "vl6",
+    frage: "Skizzieren Sie den Aufbau einer Funkenerosionsanlage und benennen Sie die einzelnen Bestandteile.",
+    muster: "Bestandteile einer Funkenerosionsanlage:\n- Vorschubregelung\n- Werkzeug (Elektrode) und Werkstück\n- Dielektrikum (deionisiertes Wasser, Öl)\n- Pumpen- und Filteraggregat\n- Funkengenerator (Relaxationsgenerator / stationärer Impulsgenerator) mit Anschlüssen (-) und (+)",
+    ki: "Bestandteile einer Funkenerosionsanlage: Vorschubregelung, Werkzeug (Elektrode) und Werkstück, Dielektrikum (deionisiertes Wasser oder Öl), Pumpen- und Filteraggregat sowie der Funkengenerator (Relaxationsgenerator bzw. stationärer Impulsgenerator) mit den Polen (-) und (+)."
+  },
+  {
+    id: "vl6-03", vl: "vl6",
+    frage: "Erläutern Sie das Prinzip der Funkenerosion anhand einer Einzelentladung und nennen Sie wesentliche Vor- und Nachteile.",
+    muster: "1. Phase (Aufbau): Anlegen einer Gleichspannung, die an der Stelle mit der geringsten Spaltweite ein elektrisches Feld bewirkt.\n2. Phase (Zündung): Bewegung und Vervielfachung der Ladungsträger bewirkt schnellen Anstieg der lokalen Temperatur des Dielektrikums – es bildet sich eine Gasblase (Plasma).\n3. Phase (Entladung): Elektrischer Durchschlag, von außen begrenzter Entladestrom; die Spannung bricht von der Leerlaufspannung (80–200 V) auf die Entladespannung (20–30 V) zusammen; Wandlung elektrischer Energie in Wärme durch kinetische Aufprallenergie, lokales Aufschmelzen der Werkstückoberfläche.\n4. Phase (Abbau): Abschalten des Entladestroms; der Entladekanal bricht zusammen → Unterdruck und Herabsetzung der Siedetemperatur; Elektrodenmaterial wird herausgeschleudert oder verdampft (Materialabtrag findet nur in der 4. Phase statt; Menge abhängig von Stromdichte und Entladedauer).\n\nVorteile: Bearbeitung schwer zerspanbarer Werkstoffe unabhängig von der Werkstückhärte, hohe Maßgenauigkeit, keine Gratbildung.\nNachteile: hohe Fertigungskosten durch Zeitaufwand und Kosten für Wasseraufbereitung und Elektroden.",
+    ki: "Einzelentladung in vier Phasen: (1) Anlegen einer Gleichspannung erzeugt an der Stelle geringster Spaltweite ein elektrisches Feld; (2) Bewegung und Vervielfachung der Ladungsträger lässt die lokale Temperatur ansteigen, es bildet sich eine Gasblase/Plasma; (3) elektrischer Durchschlag mit begrenztem Entladestrom, Spannungseinbruch von Leerlaufspannung (80–200 V) auf Entladespannung (20–30 V), lokales Aufschmelzen; (4) Abschalten des Entladestroms, Zusammenbruch des Entladekanals, Unterdruck, Herausschleudern/Verdampfen des Elektrodenmaterials (Materialabtrag). Vorteile: Bearbeitung schwer zerspanbarer Werkstoffe unabhängig von der Härte, hohe Maßgenauigkeit, keine Gratbildung. Nachteile: hohe Fertigungskosten durch Zeitaufwand und Wasseraufbereitung/Elektroden."
+  },
+  {
+    id: "vl6-04", vl: "vl6",
+    frage: "Nennen Sie fünf Merkmale der Senkerosion.",
+    muster: "- Einsenken einer Formelektrode, die geometrisch das Negativ der zu erzeugenden Werkstückform darstellt\n- Konturerzeugung durch Einsenken der Formelektrode (kinematisches Prinzip des Abformens)\n- Formabweichungen infolge von Elektrodenverschleiß; Formgenauigkeit abhängig von Arbeitsspalt und Verschleißverhalten\n- Verschleißkompensation durch Planetärerosion oder Verwendung mehrerer Elektroden\n- Dielektrikum auf Öl- oder Wasserbasis\n- Problem der Spülung zur Beseitigung der Abtragpartikel aus dem Arbeitsspalt",
+    ki: "Merkmale der Senkerosion: Einsenken einer Formelektrode, die das Negativ der zu erzeugenden Werkstückkontur darstellt; Konturerzeugung durch Einsenken (kinematisches Prinzip des Abformens); Formabweichungen infolge Elektrodenverschleiß, Formgenauigkeit abhängig von Arbeitsspalt und Verschleiß; Verschleißkompensation durch Planetärerosion oder mehrere Elektroden; Dielektrikum auf Öl- oder Wasserbasis; Spülungsproblematik zur Beseitigung der Abtragpartikel."
+  },
+  {
+    id: "vl6-05", vl: "vl6",
+    frage: "In welche Untergruppen kann das Trennverfahren Abtragen untergliedert werden? Welcher Gruppe kann die Laserbearbeitung zugeordnet werden?",
+    muster: "- Chemisches Abtragen\n- Elektrochemisches Abtragen\n- Thermisches Abtragen → thermisches Abtragen durch Strahl → Laserbearbeitung\n\nDie Laserbearbeitung ist dem thermischen Abtragen (durch Strahl) zugeordnet.",
+    ki: "Abtragen gliedert sich in chemisches Abtragen, elektrochemisches Abtragen und thermisches Abtragen. Die Laserbearbeitung ist dem thermischen Abtragen (thermisches Abtragen durch Strahl) zuzuordnen."
+  },
+  {
+    id: "vl6-06", vl: "vl6",
+    frage: "Geben Sie drei Verfahrensvarianten des Laserstrahlschneidens an. Welche Vorteile ergeben sich durch den Einsatz eines Lasers?",
+    muster: "Verfahrensvarianten:\n- Laser-Brennschneiden\n- Laser-Schmelzschneiden\n- Laser-Sublimierschneiden\n\nVorteile:\n- alle Materialien bearbeitbar\n- hohe Leistungsdichte durch Fokussierbarkeit\n- flexibel einsetzbar und berührungslose Bearbeitung",
+    ki: "Verfahrensvarianten: Laser-Brennschneiden, Laser-Schmelzschneiden, Laser-Sublimierschneiden. Vorteile des Lasereinsatzes: hohe Leistungsdichte und gute Fokussierbarkeit, alle Materialien bearbeitbar, vielseitig einsetzbar und berührungslose Bearbeitung."
+  },
+  {
+    id: "vl6-07", vl: "vl6",
+    frage: "Nennen und beschreiben Sie drei Verfahrensvarianten des Laserstrahlschneidens.",
+    muster: "- Laser-Brennschneiden: Erhitzen bis zur Zündtemperatur und anschließendes Verbrennen mit Sauerstoff. Anwendung: Trennen von Metallen.\n- Laser-Schmelzschneiden: Aufschmelzen durch den Laserstrahl, Ausblasen mit reaktionsträgem Gas. Anwendung: hochlegierte Stähle, Nichteisenmetalle.\n- Laser-Sublimierschneiden: Erhitzen auf Sublimationstemperatur, Ausblasen mit reaktionsträgem Gas. Anwendung: Holz, Papier, Keramik, Kunststoffe.",
+    ki: "Laser-Brennschneiden: Werkstoff wird bis zur Zündtemperatur erhitzt und mit Sauerstoff verbrannt (Anwendung: Trennen von Metallen). Laser-Schmelzschneiden: Aufschmelzen durch den Laserstrahl, Ausblasen mit reaktionsträgem/-fähigem Gas (Anwendung: hochlegierte Stähle, Nichteisenmetalle). Laser-Sublimierschneiden: Erhitzen auf Sublimationstemperatur, Ausblasen mit reaktionsträgem Gas (Anwendung: Holz, Papier, Keramik, Kunststoffe)."
+  },
+
+  // =================== VL 7: Fügen ===================
+  {
+    id: "vl7-01", vl: "vl7",
+    frage: "Teilen Sie die Fügeverfahren nach DIN 8593 T0 ein und nennen Sie je ein Anwendungsbeispiel. / Definieren Sie den Begriff Fügen und nennen Sie die Hauptschlussarten mit je einem Beispiel.",
+    muster: "Definition: Fügen ist das auf Dauer angelegte Verbinden oder sonstige Zusammenbringen von zwei oder mehr Werkstücken geometrisch bestimmter Form oder von ebensolchen Werkstücken mit formlosem Stoff. Dabei wird der Zusammenhalt örtlich geschaffen und im Ganzen vermehrt.\n\nEinteilung (mit Beispiel):\n- Zusammensetzen (Einlegen einer Passfeder in Nut)\n- Füllen (Einfüllen von Bremsflüssigkeit)\n- An- und Einpressen (Anschrauben von Bauteilen)\n- Fügen durch Urformen (Ummanteln von Kabel mit Isolierung)\n- Fügen durch Umformen (Falzen von Innen-/Außenblechen bei Fahrzeugtüren)\n- Fügen durch Schweißen (Punktschweißen von Autotüren)\n- Fügen durch Löten (Weichlöten)\n- Kleben (Nasskleben)\n- Textiles Fügen (Wirken, Nähwirken)\n\nHauptschlussarten:\n- Formschluss (Passfeder-, Keilwellen-, Zahnwellenverbindungen)\n- Kraftschluss (Klemm-, Kegel-, Schraubverbindungen)\n- Stoffschluss (Schweißen, Löten, Kleben)",
+    ki: "Fügen ist das auf Dauer angelegte Verbinden oder sonstige Zusammenbringen von zwei oder mehr Werkstücken geometrisch bestimmter Form oder mit formlosem Stoff, wobei der Zusammenhalt örtlich geschaffen und im Ganzen vermehrt wird. Einteilung nach DIN 8593 T0: Zusammensetzen (z. B. Passfeder in Nut), Füllen (z. B. Bremsflüssigkeit einfüllen), An- und Einpressen (z. B. Anschrauben), Fügen durch Urformen (z. B. Kabelummantelung), Fügen durch Umformen (z. B. Falzen von Fahrzeugtüren), Fügen durch Schweißen, Fügen durch Löten, Kleben, textiles Fügen. Hauptschlussarten: Formschluss (z. B. Passfederverbindung), Kraftschluss (z. B. Schraubverbindung), Stoffschluss (Schweißen, Löten, Kleben)."
+  },
+  {
+    id: "vl7-02", vl: "vl7",
+    frage: "Beschreiben Sie die Unterschiede der Verbindungsarten Formschluss, Kraftschluss und Stoffschluss und nennen Sie je ein Beispiel.",
+    muster: "- Formschluss: Schluss zwischen zwei sich berührenden Wirkflächen fester Körper senkrecht zu den Berührungsflächen. Beispiel: Einsetzen einer Passfeder in eine Nut (Keilwellen-, Zahnwellenverbindungen, Kerbzahnprofile).\n- Kraftschluss: überträgt eine Kraft sowohl über Wirkräume als auch über Wirkflächenpaarungen. Die Teile werden an den Trennstellen bis zur Berührung zusammengeführt (kein Spiel); jedes übertragende Teil wird mehr oder weniger stark verformt. Beispiel: Klemm-, Kegel-, Ringfederspann-, Schraubverbindungen.\n- Stoffschluss: durch molekulare Kräfte entstehender Schluss zwischen Molekülen eines abgegrenzten Wirkraumes, der diese zu einem festen Körper zusammenhält; Relativbewegung der verbundenen Teile in allen Richtungen gesperrt. Beispiel: Schweißen, Löten, Kleben.",
+    ki: "Formschluss ist ein Schluss zwischen zwei sich berührenden Wirkflächen fester Körper senkrecht zu den Berührungsflächen (Beispiel: Passfeder in Nut). Kraftschluss überträgt eine Kraft über Wirkräume und Wirkflächenpaarungen; die Teile werden bis zur Berührung zusammengeführt (kein Spiel) und jedes übertragende Teil verformt sich (Beispiel: Schraub-/Klemmverbindung). Stoffschluss entsteht durch molekulare Kräfte zwischen Molekülen eines abgegrenzten Wirkraumes und sperrt die Relativbewegung in allen Richtungen (Beispiel: Schweißen, Löten, Kleben)."
+  },
+  {
+    id: "vl7-03", vl: "vl7",
+    frage: "Definieren Sie den Begriff Schweißen. Mit welchen Wärmequellen können Schweißarbeiten durchgeführt werden?",
+    muster: "Definition: Schweißen ist das Fügen von Metallen oder Kunststoffen unter Anwendung von Wärme, Druck oder beidem, mit oder ohne Zusatzwerkstoff mit gleichem oder nahezu gleichem Schmelzbereich.\n\nWärmequellen:\n- elektrischer Lichtbogen\n- Gasflamme\n- Erwärmung durch elektrischen Widerstand\n- Induktion\n- Reibung\n- flüssige Schmelze oder Wärmeträger\n- Licht\n- beschleunigte Elektronen\n- exotherme chemische Reaktionen",
+    ki: "Schweißen ist das Fügen von Metallen oder Kunststoffen unter Anwendung von Wärme, Druck oder beidem, mit oder ohne Zusatzwerkstoff mit gleichem oder nahezu gleichem Schmelzbereich. Wärmequellen: elektrischer Lichtbogen, Gasflamme, Erwärmung durch elektrischen Widerstand, Induktion, Reibung, flüssige Schmelze oder Wärmeträger, Licht, beschleunigte Elektronen und exotherme chemische Reaktionen."
+  },
+  {
+    id: "vl7-04", vl: "vl7",
+    frage: "Nennen Sie fünf verschiedene Schweißverfahren.",
+    muster: "- Widerstandspressschweißen\n- Gasschmelzschweißen\n- Lichtbogenschweißen\n- Metall-Schutzgasschweißen\n- Wolfram-Inertgasschweißen\n(Pressschweißen: z. B. Reibschweißen; Schmelzschweißen: z. B. Lichtbogen-/Metallschutzgasschweißen)",
+    ki: "Fünf Schweißverfahren: Widerstandspressschweißen, Gasschmelzschweißen, Lichtbogenschweißen, Metall-Schutzgasschweißen, Wolfram-Inertgasschweißen. Übergeordnet werden Pressschweißen (z. B. Reibschweißen, Widerstandspressschweißen) und Schmelzschweißen (z. B. Gasschmelz-, Lichtbogen-, Metallschutzgasschweißen) unterschieden."
+  },
+  {
+    id: "vl7-05", vl: "vl7",
+    frage: "Erläutern Sie das Wirkprinzip der Erzeugung der Metallverbindung beim Widerstandspressschweißen.",
+    muster: "Widerstandspressschweißen verbindet Werkstücke durch Strom, Wärme und Druck (keine abschmelzende Elektrode und kein Lichtbogen nötig). Die Metallverbindung entsteht durch:\n1. Erwärmen der Berührungsflächen der Werkstücke mit Hilfe des elektrischen Stroms (ohmscher Widerstand der zu verbindenden Teile)\n2. anschließendes Zusammendrücken",
+    ki: "Beim Widerstandspressschweißen werden Werkstücke durch Strom, Wärme und Druck verbunden (ohne abschmelzende Elektrode und ohne Lichtbogen). Die Metallverbindung entsteht durch Erwärmen der Berührungsflächen mit Hilfe des elektrischen Stroms (ohmscher Widerstand der zu verbindenden Teile) und anschließendes Zusammendrücken."
+  },
+  {
+    id: "vl7-06", vl: "vl7",
+    frage: "Definieren Sie den Begriff „Kleben“ und beschreiben Sie den Unterschied zwischen „Adhäsion“ und „Kohäsion“.",
+    muster: "Kleben ist Fügen unter Verwendung eines Klebstoffes, d. h. eines nichtmetallischen Werkstoffes, der Fügeteile durch Flächenhaftung (Adhäsion) und innere Festigkeit (Kohäsion) verbinden kann.\n\nAdhäsion: der Zusammenhalt zweier Materialien im Kontakt zueinander.\nKohäsion: Eigenschaft eines Materials, die dessen Zusammenhalt bewirkt und seinen Zerfall verhindert.",
+    ki: "Kleben ist Fügen unter Verwendung eines Klebstoffes (nichtmetallischer Werkstoff), der Fügeteile durch Flächenhaftung und innere Festigkeit verbindet. Adhäsion bezeichnet den Zusammenhalt zweier Materialien im Kontakt zueinander; Kohäsion bezeichnet die Eigenschaft eines Materials, die dessen Zusammenhalt bewirkt und seinen Zerfall verhindert."
+  },
+
+  // =================== VL 8: Beschichten ===================
+  {
+    id: "vl8-01", vl: "vl8",
+    frage: "Nennen Sie sechs Einsatzgebiete, in denen Beschichtungen Anwendung finden.",
+    muster: "- Korrosionsschutzschichten (z. B. keramikbeschichtete Gasturbinenschaufel)\n- Verschleißschutzschichten (z. B. DLC-beschichtete Umformwerkzeuge)\n- Biokompatible Schichten (z. B. silberbeschichteter Herzkatheter)\n- Dekorative Schichten (z. B. DLC-beschichtete Türbeschläge)\n- Optische Funktionsschichten (z. B. Vergütung von Kunststoffbrillenglas)\n- Barriereschichten (z. B. beschichtete Kunststofffolien)\n- Elektrische Funktionsschichten (z. B. goldbeschichtete Kontaktgehäuse)\n- Magnetische Funktionsschichten (z. B. EMV-Abschirmschichten)",
+    ki: "Einsatzgebiete von Beschichtungen: Korrosionsschutzschichten, Verschleißschutzschichten (z. B. DLC), biokompatible Schichten, dekorative Schichten, optische Funktionsschichten, Barriereschichten, elektrische Funktionsschichten und magnetische Funktionsschichten."
+  },
+  {
+    id: "vl8-02", vl: "vl8",
+    frage: "Skizzieren Sie den Aufbau einer unbehandelten technischen Werkstoffoberfläche und benennen Sie die einzelnen Schichten. Welche Vorbehandlungsmöglichkeiten werden vor dem Beschichten eingesetzt?",
+    muster: "Aufbau (von außen nach innen):\n- Verunreinigungen (~5 nm)\n- Adsorptionsschicht (~5 nm)\n- Oxidschicht (~1...10 nm)\n→ äußere Grenzschicht\n- verformte Schicht / innere Grenzschicht (>5 µm)\n- Grundwerkstoff\n\nVorbehandlungsmöglichkeiten:\n- Entfetten\n- Aufrauen\n- evtl. elektrisch leitfähig machen",
+    ki: "Eine unbehandelte technische Werkstoffoberfläche besteht aus Verunreinigungen (~5 nm), Adsorptionsschicht (~5 nm) und Oxidschicht (~1–10 nm) als äußere Grenzschicht, darunter die verformte Schicht (innere Grenzschicht, >5 µm) und der Grundwerkstoff. Vorbehandlungsmöglichkeiten: Entfetten, Aufrauen und ggf. elektrisch leitfähig machen."
+  },
+  {
+    id: "vl8-03", vl: "vl8",
+    frage: "Welche Verschleißmechanismen sind in der Oberflächentechnik des Beschichtens relevant? Nennen und beschreiben Sie die vier Mechanismen der Werkstoffschädigung bei Abrasion.",
+    muster: "Verschleißmechanismen:\n- Abrasion\n- Adhäsion\n- Tribochemische Reaktion\n- Oberflächenzerrüttung\n(sowie tribophysikalische Vorgänge)\n\nMechanismen der Werkstoffschädigung bei Abrasion:\n- Mikropflügen: plastische Verformung des Grundwerkstoffs\n- Mikrospanen: Span wird aus dem Grundwerkstoff geschnitten\n- Mikroermüden: Verformung über den plastischen Zustand hinaus\n- Mikrobrechen: Schichtteile brechen aus oder platzen ab",
+    ki: "Relevante Verschleißmechanismen: Abrasion, Adhäsion, tribochemische Reaktion und Oberflächenzerrüttung (sowie tribophysikalische Vorgänge). Mechanismen der Werkstoffschädigung bei Abrasion: Mikropflügen (plastische Verformung des Grundwerkstoffs), Mikrospanen (Span wird aus dem Grundwerkstoff geschnitten), Mikroermüden (Verformung über den plastischen Zustand hinaus) und Mikrobrechen (Schichtteile brechen aus bzw. platzen ab)."
+  },
+  {
+    id: "vl8-04", vl: "vl8",
+    frage: "Nennen und erläutern Sie fünf unterschiedliche Haftungstypen.",
+    muster: "- Mechanischer Übergang: Haftung der Schicht durch reine mechanische Verklammerung\n- Monoschicht-Übergang: Übergang erfolgt innerhalb einer oder weniger Atomschichten; Haftung durch Van-der-Waals-Kräfte\n- Verbindungs-Übergang: Übergang zwischen Substrat und Schicht erfolgt durch chemische Bindung\n- Diffusions-Übergang: kontinuierlicher Übergang der chemischen Zusammensetzung; Diffusion von Atomen aus dem Substrat in die Schicht und umgekehrt\n- Pseudodiffusions-Übergang: durch hohe Energie dringen nicht-lösliche Teilchen in tiefere Atomlagen des Substrates",
+    ki: "Haftungstypen: Mechanischer Übergang (Haftung durch reine mechanische Verklammerung), Monoschicht-Übergang (innerhalb einer/weniger Atomschichten, Haftung durch Van-der-Waals-Kräfte), Verbindungs-Übergang (chemische Bindung zwischen Substrat und Schicht), Diffusions-Übergang (kontinuierlicher Übergang der chemischen Zusammensetzung durch Diffusion in beide Richtungen) und Pseudodiffusions-Übergang (energiereiche, nicht-lösliche Teilchen dringen in tiefere Atomlagen des Substrats)."
+  },
+  {
+    id: "vl8-05", vl: "vl8",
+    frage: "Nennen Sie gemäß DIN 8580 die acht unterschiedlichen Beschichtungsverfahren.",
+    muster: "Beschichten…\n- aus dem flüssigen Zustand\n- aus dem plastischen Zustand\n- aus dem breiigen Zustand\n- aus dem körnigen oder pulverförmigen Zustand\n- durch Schweißen\n- durch Löten\n- aus dem gas- oder dampfförmigen Zustand\n- aus dem ionisierten Zustand",
+    ki: "Acht Beschichtungsverfahren nach DIN 8580: Beschichten aus dem flüssigen Zustand, aus dem plastischen Zustand, aus dem breiigen Zustand, aus dem körnigen oder pulverförmigen Zustand, durch Schweißen, durch Löten, aus dem gas- oder dampfförmigen Zustand und aus dem ionisierten Zustand."
+  },
+  {
+    id: "vl8-06", vl: "vl8",
+    frage: "Beschreiben Sie den Prozessablauf beim PVD-Beschichten und nennen Sie zwei Verfahrensvarianten.",
+    muster: "Prozessablauf (PVD = Vakuumbeschichtungsverfahren):\n1. Dampferzeugung\n2. Dampftransport von der Teilchenquelle zum Substrat\n3. Adsorption der Teilchen, Schichtbildung und -wachstum auf dem Substrat\n\nVerfahrensvarianten:\n- Bedampfen (Heizung, Lichtbogen)\n- Sputtern (Plasma)\n- Ionenplattieren (Ionenstrahlquelle)",
+    ki: "PVD ist ein Vakuumbeschichtungsverfahren. Prozessablauf: (1) Dampferzeugung, (2) Dampftransport von der Teilchenquelle zum Substrat, (3) Adsorption der Teilchen, Schichtbildung und -wachstum auf dem Substrat. Verfahrensvarianten: Bedampfen (Heizung, Lichtbogen), Sputtern (Plasma), Ionenplattieren (Ionenstrahlquelle)."
+  },
+  {
+    id: "vl8-07", vl: "vl8",
+    frage: "Nennen Sie die Vor- und Nachteile des Thermischen Beschichtens.",
+    muster: "Vorteile:\n- freie Wahl von Schicht- und Grundwerkstoff\n- unabhängig von Geometrie und Größe der Bauteile\n\nNachteile:\n- Haftung und Porigkeit der Schicht begrenzen die Anwendung\n- starker Spritzverlust",
+    ki: "Vorteile des thermischen Beschichtens: freie Wahl von Schicht- und Grundwerkstoff, unabhängig von Geometrie und Größe der Bauteile. Nachteile: Haftung und Porigkeit der Schicht begrenzen die Anwendung, starker Spritzverlust."
+  },
+
+  // =================== VL 9: Wärmebehandeln ===================
+  {
+    id: "vl9-01", vl: "vl9",
+    frage: "Unterteilen Sie das Wärmebehandeln in acht Gruppen gemäß DIN 8580.",
+    muster: "- Glühen\n- Härten\n- Isothermisch Umwandeln\n- Anlassen/Auslagern\n- Vergüten\n- Tiefkühlen\n- Thermochemisches Behandeln\n- Aushärten",
+    ki: "Acht Gruppen des Wärmebehandelns nach DIN 8580: Glühen, Härten, Isothermisch Umwandeln, Anlassen/Auslagern, Vergüten, Tiefkühlen, Thermochemisches Behandeln und Aushärten."
+  },
+  {
+    id: "vl9-02", vl: "vl9",
+    frage: "Definieren Sie den Begriff „Wärmebehandeln“ nach DIN 17014.",
+    muster: "Ein Werkstück wird ganz oder teilweise Temperatur-Zeit-Folgen und ggf. zusätzlich anderen physikalischen und/oder chemischen Einwirkungen ausgesetzt, um ihm Eigenschaften zu verleihen, die es für seine Weiterverarbeitung oder Verwendung geeignet machen.",
+    ki: "Wärmebehandeln (DIN 17014): Ein Werkstück wird ganz oder teilweise Temperatur-Zeit-Folgen und ggf. zusätzlich anderen physikalischen und/oder chemischen Einwirkungen ausgesetzt, um ihm Eigenschaften zu verleihen, die es für seine Weiterverarbeitung oder Verwendung geeignet machen."
+  },
+  {
+    id: "vl9-03", vl: "vl9",
+    frage: "Nennen Sie die wichtigsten thermischen Wärmebehandlungsverfahren für Stahlwerkstoffe und die jeweiligen Temperaturbereiche.",
+    muster: "- Diffusionsglühen: 1000 °C – 1300 °C (knapp unter Soliduslinie)\n- Normalglühen: 700 °C – 1100 °C\n- Weichglühen: 600 °C – 800 °C\n- Spannungsarmglühen: 450 °C – 650 °C\n- Härten: 450 °C – 550 °C\n- Anlassen: 100 °C – 600 °C\n- Vergüten: 460 °C – 830 °C\n- Warmumformen: 500 °C – 1300 °C",
+    ki: "Wichtige thermische Wärmebehandlungsverfahren für Stahl und Temperaturbereiche: Diffusionsglühen 1000–1300 °C, Normalglühen 700–1100 °C, Weichglühen 600–800 °C, Spannungsarmglühen 450–650 °C, Härten 450–550 °C, Anlassen 100–600 °C, Vergüten 460–830 °C, Warmumformen 500–1300 °C."
+  },
+  {
+    id: "vl9-04", vl: "vl9",
+    frage: "Was ist das Ziel einer Vergütungsbehandlung? Zeichnen Sie den Temperaturverlauf einer Vergütungsbehandlung von Stahl.",
+    muster: "Ziel: bei vorgegebener Festigkeit ein Maximum an Zähigkeit im Stahl zu entwickeln. Dies wird durch eine kombinierte Wärmebehandlung aus Härten und Anlassen erreicht.\n\nTemperaturverlauf (2-stufiges Vergüten):\n(a) Härten: Erwärmen oberhalb Ac3, dann Abschrecken\n(b) Anlassen: erneutes Erwärmen auf mittlere Temperatur, dann Abkühlen\n(Einsatz bei hohen dynamischen Belastungen oder tiefen Temperaturen, Sprödbruchgefahr.)",
+    ki: "Ziel der Vergütungsbehandlung: bei vorgegebener Festigkeit ein Maximum an Zähigkeit im Stahl zu entwickeln; erreicht durch kombinierte Wärmebehandlung aus Härten und Anlassen. Der Temperaturverlauf zeigt zwei Stufen: (a) Härten (Erwärmen oberhalb Ac3 und Abschrecken) und (b) Anlassen (erneutes Erwärmen auf mittlere Temperatur und Abkühlen). Eingesetzt bei hohen dynamischen Belastungen/tiefen Temperaturen und Sprödbruchgefahr."
+  },
+  {
+    id: "vl9-05", vl: "vl9",
+    frage: "Was versteht man unter Einsatzhärten? Wodurch unterscheidet sich das Härten vom Einsatzhärten?",
+    muster: "Einsatzhärten: Anreichern der Randzone von Stahlbauteilen mit Kohlenstoff (Aufkohlen) und anschließendes Härten (ggf. Anlassen, Weichglühen). Ziel ist eine hohe Randschichthärte. Wird genutzt, wenn der Kohlenstoffgehalt sonst nicht ausreichend wäre (Randschichthärten mit vorausgegangener Anreicherung).\n\nUnterschied: Beim (martensitischen) Härten wird durch Abschrecken aus der Lösungstemperatur (Austenitisierungstemperatur) Martensit gebildet; das Bauteil muss bereits genügend Kohlenstoff (min. ca. 0,4–0,5 %) enthalten. Beim Einsatzhärten wird die Randschicht zäher (kohlenstoffarmer) Stähle zunächst aufgekohlt, um den für die Härtung ausreichenden Kohlenstoffanteil zu erhalten.",
+    ki: "Einsatzhärten ist das Anreichern der Randzone von Stahlbauteilen mit Kohlenstoff (Aufkohlen) und anschließendes Härten (ggf. Anlassen/Weichglühen), um eine hohe Randschichthärte zu erzeugen. Härten dient allgemein der Härte- und Festigkeitssteigerung durch Martensitbildung beim Abschrecken aus der Austenitisierungstemperatur und setzt einen ausreichenden Kohlenstoffgehalt (min. ca. 0,4–0,5 %) voraus. Beim Einsatzhärten wird die Randschicht zäher, kohlenstoffarmer Stähle erst aufgekohlt, um den für die Härtung nötigen Kohlenstoffgehalt zu erreichen; der Kern behält die ursprünglichen Eigenschaften."
+  },
+  {
+    id: "vl9-06", vl: "vl9",
+    frage: "Was versteht man unter Nitrieren? Nennen Sie zusätzlich weitere thermochemische Wärmebehandlungsverfahren.",
+    muster: "Nitrieren: Oberflächenhärtung durch Anreicherung der Randzone mit Stickstoff (Nitrieren) bzw. gleichzeitig mit Stickstoff und Kohlenstoff (Nitrocarbonieren).\n\nWeitere thermochemische Verfahren (Eindiffusion von Metallen in die Randzone zur Erhöhung der Korrosions- und Verschleißbeständigkeit):\n- Borieren\n- Chromieren\n- Aluminieren\n- Vanadieren\n- Silizieren",
+    ki: "Nitrieren bezeichnet die Oberflächenhärtung durch Anreicherung der Randzone mit Stickstoff (bzw. gleichzeitig Stickstoff und Kohlenstoff beim Nitrocarbonieren). Weitere thermochemische Wärmebehandlungsverfahren beruhen auf der Eindiffusion von Metallen in die Randzone (Erhöhung der Korrosions- und Verschleißbeständigkeit): Borieren, Chromieren, Aluminieren, Vanadieren und Silizieren."
+  },
+
+  // =================== VL 10: Fertigungsprozessketten ===================
+  {
+    id: "vl10-01", vl: "vl10",
+    frage: "Geben Sie die vertikale Gliederung von Fertigungsprozessen an.",
+    muster: null,
+    ki: "Vertikale Gliederung von Fertigungsprozessen (von oben nach unten): Fertigungsprozess (Erzeugnisherstellung), Fertigungsteilprozess (Einzelteilherstellung), technologisch bedingte Fertigungsprozessstufe (Zwangsfolge), technologische Operation auf einem Arbeitsplatz (Arbeitsgang), technologische Operation in einer Aufspannung (Spannstufe), technologische Operation mit einem Werkzeug (Arbeitsstufe) und Arbeitsstufenteil mit konstanten technologischen Werten (Operation)."
+  },
+  {
+    id: "vl10-02", vl: "vl10",
+    frage: "Nennen Sie Gründe, die eine Neugestaltung von Fertigungsprozessketten notwendig machen.",
+    muster: null,
+    ki: "Gründe für die Neugestaltung von Fertigungsprozessketten: Aufnahme neuer Produkte in das Produktionsprogramm, Anpassung des Fertigungsablaufs an Änderungen des Werkstückes, Veränderung der Kapazität aufgrund variierender Absatzerwartungen sowie Ersatz bestehender Verfahren wegen technischer Veralterung."
+  },
+  {
+    id: "vl10-03", vl: "vl10",
+    frage: "Nennen und beschreiben Sie die Methoden zur Gestaltung von Fertigungsprozessketten.",
+    muster: null,
+    ki: "Methoden: (1) Anpassungsplanung – der Arbeitsplan eines ähnlichen Werkstücks wird durch Einfügen und/oder Löschen einzelner Arbeitsschritte abgeändert (ggf. einfache Berechnung der Vorgabezeiten); (2) Ähnlichkeits- und Variantenplanung – ausgehend von einer Standardlösung für den Grundtyp häufig wiederkehrender Werkstückgruppen wird der Einzelplan durch Variation bestimmter Parameter erstellt; (3) Neuplanung – bei zunehmender Variation, entweder mit vorgegebener Prozessfolge oder aus der Beschreibung von Roh- und Fertigteil."
+  },
+  {
+    id: "vl10-04", vl: "vl10",
+    frage: "Skizzieren Sie die fünf Stufen der Vorgehensweise zur Neuplanung einer Fertigungsprozesskette.",
+    muster: null,
+    ki: "Fünf Stufen der Neuplanung einer Fertigungsprozesskette: (1) Analyse der Fertigungsaufgabe, (2) Auswahl technologisch möglicher Verfahrensalternativen, (3) Aufstellung alternativer Prozessketten, (4) wirtschaftliche Bewertung der Prozessketten, (5) Optimierung der gewählten Prozesskette hinsichtlich der vorgegebenen Zielfunktion."
+  },
+  {
+    id: "vl10-05", vl: "vl10",
+    frage: "Nennen Sie die gebräuchlichsten Hilfsmittel zur Auswahl von Verfahrensalternativen.",
+    muster: null,
+    ki: "Im Skript werden im Zusammenhang mit der eindeutigen Prozessplanung als Auswahlmethoden die Nutzwertanalyse und die Simulation genannt; bei der mehrdeutigen Prozessplanung erfolgt die Auswahl über die Erfüllung gestellter Zielkriterien und die Gleichbehandlung aller Prozesse. Grundlage der Bewertung ist der dreidimensionale Zielerfüllungsraum aus Qualitäts-, Kosten- und Zeitzielen."
+  },
+  {
+    id: "vl10-06", vl: "vl10",
+    frage: "Aus welchen Kostenbestandteilen (nach REFA) setzen sich Herstellkosten zusammen?",
+    muster: null,
+    ki: "Die Herstellkosten setzen sich aus Fertigungskosten und Materialkosten zusammen. Die Fertigungskosten gliedern sich in Fertigungslohnkosten und Fertigungsgemeinkosten, die Materialkosten in Materialeinzelkosten und Materialgemeinkosten. Die Fertigungslohnkosten ergeben sich aus dem Verrechnungslohnsatz k_L mal der Summe aus Hauptzeit t_h, Nebenzeit t_n und Rüstzeit t_r."
+  },
+
+  // =================== VL 11: Montage ===================
+  {
+    id: "vl11-01", vl: "vl11",
+    frage: "Nennen Sie die Komponenten eines Montagesystems.",
+    muster: null,
+    ki: "Ein Montagesystem umfasst materielle, dispositive und operative Komponenten: Montageobjekt (Teil, Gruppe, Produkt mit implizierter Aufgabenstellung), Montagemittel (Komponenten mit Arbeitsvermögen zur Ausführung eines Montagevorgangs), Montagepersonal (Gruppe von Arbeitspersonen für manuelle Montagevorgänge), Montageplanung (Schaffung eines Systems mit dem erforderlichen Arbeitspotential), Montagesteuerung (Koordinierung und Regelung des Ablaufs) und Montageprozess (gegliederte Abfolge von Teiloperationen)."
+  },
+  {
+    id: "vl11-02", vl: "vl11",
+    frage: "Nennen Sie die Tätigkeitsgruppen des Montierens nach DIN 8593.",
+    muster: null,
+    ki: "Die Tätigkeitsgruppen (Teilfunktionen) des Montierens sind: Fügen, Handhaben, Kontrollieren, Justieren und Sonderoperationen."
+  },
+  {
+    id: "vl11-03", vl: "vl11",
+    frage: "Nennen Sie vier Grundarten von Montagerobotern.",
+    muster: null,
+    ki: "Grundarten von Montagerobotern (Industrierobotern): nach Linearachsen das Portal und der Lineararm auf Schiene; nach Dreh- und Linearachsen der Schwenkarm und der Horizontalknickarm; nach Drehachsen der Pendelarm und der Vertikalknickarm."
+  },
+  {
+    id: "vl11-04", vl: "vl11",
+    frage: "Nennen Sie fünf unterschiedliche Kinematiken für Industrieroboter.",
+    muster: null,
+    ki: "Kinematiken für Industrieroboter: kartesisches Gerät, Zylinderkoordinaten-Gerät, Kugelkoordinaten-Gerät, horizontales Knickarm-Gerät und vertikales Knickarm-Gerät."
+  },
+  {
+    id: "vl11-05", vl: "vl11",
+    frage: "Was ist eine Speicherprogrammierbare Steuerung (SPS)?",
+    muster: null,
+    ki: "Eine Speicherprogrammierbare Steuerung (SPS) ist ein Kleincomputer, der zur Automation von Maschinen und Anlagen benutzt wird. Der gewünschte Ablauf der zu steuernden Maschine oder Anlage wird über die SPS durch ein Programm festgelegt."
+  },
+
+  // =================== VL 12: Kreislaufwirtschaft ===================
+  {
+    id: "vl12-01", vl: "vl12",
+    frage: "Nennen Sie die Punkte des gesetzlichen und technisch-wirtschaftlichen Rahmens der Kreislaufwirtschaft sowie die Ursachen für ihre zunehmende Bedeutung.",
+    muster: null,
+    ki: "Gesetzlicher Rahmen: Gesetze (Kreislaufwirtschaftsgesetz), Verordnungen (Altauto-/Altfahrzeugverordnung, Informationstechnikverordnung), technische Anleitungen (TA Siedlungsabfall). Technisch-wirtschaftlicher Rahmen: verfügbare Recyclingtechnologien, Recycling- und Demontageprozesskosten, Erlöse für Sekundärmaterialien und wiederverwendbare Bauteile. Ursachen für die zunehmende Bedeutung: Verknappung von Ressourcen, steigende Produktion und kürzere Innovationszyklen, Kostensteigerung zur umweltverträglichen Beseitigung sowie ökologische Sensibilisierung der Bevölkerung."
+  },
+  {
+    id: "vl12-02", vl: "vl12",
+    frage: "Nennen Sie die Arbeitsfelder der modernen Kreislaufwirtschaft und geben Sie je ein Beispiel an.",
+    muster: null,
+    ki: "Arbeitsfelder der industriellen Kreislaufwirtschaft: Entwicklung systemanalytischer Werkzeuge (z. B. Organisations- und Logistikstrukturen, Analyse-/Planungs-/Bewertungsmodelle); Kreislaufführung auf der Rohstoffebene (z. B. Aufbereitung zu Sekundärrohstoffen); Kreislaufführung auf der Werkstoffebene (z. B. kreislauffähige Materialien, Qualitätssicherungskriterien); Kreislaufführung auf Produkt- und Bauteilebene (z. B. lebensdauerverlängerte/kreislauffähige Bauteile, Demontage- und Aufbereitungstechnologien); Entsorgung (z. B. thermische Behandlung, Deponierung)."
+  },
+  {
+    id: "vl12-03", vl: "vl12",
+    frage: "Wann ist ein Produkt kreislauffähig? Geben Sie die Kriterien an.",
+    muster: null,
+    ki: "Hinweis: Diese Frage stammt aus dem Fragenkatalog (VL 12, F03); im Skript ist die zugehörige Folie laut Fragenkatalog herausgefallen, es liegt keine eindeutige Kriterienliste vor. Aus den Produktionstrends zur Umsetzung der Kreislaufführung lassen sich jedoch Gestaltungsmerkmale kreislauffähiger Produkte ableiten: modularer Produktaufbau, Verwendung standardisierter Komponenten, Aufrüstbarkeit des Produktes, Einsatz langlebiger Teile/Komponenten/Güter sowie Verarbeitung qualitativ hochwertiger Teile und Komponenten."
+  },
+  {
+    id: "vl12-04", vl: "vl12",
+    frage: "Definieren Sie Recycling. Geben Sie an, was Recycling umfasst.",
+    muster: null,
+    ki: "Recycling ist die erneute Verwendung oder Verwertung von Produkten oder Teilen von Produkten in Form von Kreisläufen (DIN 8592). Recycling umfasst die physische Erfassung der Rückstände, die Trennung und Aufbereitung recyclingfähiger Substanzen bzw. Verdichtung der Energiearten, den Transport zur Einsatzstelle und die Eingabe als Input eines Prozesses. Systematisches Recycling verlangt planerische, organisatorische und technische Voraussetzungen."
+  },
+  {
+    id: "vl12-05", vl: "vl12",
+    frage: "Nennen und beschreiben Sie die Formen des Recyclings nach VDI-Richtlinie 2243 und zählen Sie je ein Beispiel auf.",
+    muster: null,
+    ki: "Recyclingformen nach VDI 2243 (bauteilorientiert = Verwendung, materialorientiert = Verwertung): Wiederverwendung – erneute Benutzung eines Altprodukts für den gleichen Verwendungszweck (Beispiel: Mehrwegverpackung); Weiterverwendung – erneute Benutzung für einen anderen Verwendungszweck (Beispiel: Senfglas wird Trinkglas); Wiederverwertung – wiederholter Einsatz von Altstoffen/Produktionsabfällen in einem gleichartigen Prozess, es entstehen weitgehend gleichwertige Werkstoffe (Beispiel: Umschmelzen von Angüssen); Weiterverwertung – Einsatz in einem noch nicht durchlaufenen Prozess, es entstehen Werkstoffe/Produkte mit anderen Eigenschaften (Beispiel: Teer aus Kokerei wird Asphalt; chemisches Recycling von Altkunststoffen)."
+  },
+  {
+    id: "vl12-06", vl: "vl12",
+    frage: "Ordnen Sie Demontagesysteme in Abhängigkeit des Auftragsspektrums hinsichtlich Flexibilität und Produktivität (Achsen: Jahresstückzahl pro Demontageprodukt und Anzahl verschiedener Demontageprodukte).",
+    muster: null,
+    ki: "Mit steigender Jahresstückzahl pro Demontageprodukt und sinkender Anzahl verschiedener Demontageprodukte (höhere Produktivität, geringere Flexibilität) ordnen sich die Systeme etwa so an: manueller Demontagearbeitsplatz, bedienbare Demontagemaschine, programmierbare Demontagemaschine, Demontagezentrum, Demontagezelle, Demontageinsel, Demontagenetz und Demontage-Transferstraße. Hohe Stückzahl/wenige Produktarten → Transferstraße (produktiv, wenig flexibel); viele Produktarten/kleine Stückzahl → manueller Arbeitsplatz (flexibel, wenig produktiv)."
+  },
+  {
+    id: "vl12-07", vl: "vl12",
+    frage: "Nennen Sie fünf Komponenten eines flexiblen Demontagesystems.",
+    muster: null,
+    ki: "Komponenten eines flexiblen Demontagesystems: Systemsteuerung, Demontageroboter, Werkzeugwechsler, Erkennungssystem, Spannsystem, Werkzeuge, Teileabfuhr und Kleinteileabführung."
+  }
+];
+
+
+</script>
+<script>
+/* === APP-LOGIK === */
+(function(){
+  "use strict";
+
+  // ---- Hilfen ----
+  var catLabel = {};
+  KATEGORIEN.forEach(function(k){ catLabel[k.key] = k.label; });
+
+  function byCat(){
+    var m = {};
+    KATEGORIEN.forEach(function(k){ m[k.key] = []; });
+    FRAGEN.forEach(function(f){ if(m[f.vl]) m[f.vl].push(f); });
+    return m;
+  }
+  var GRUPPEN = byCat();
+
+  function shuffle(arr){
+    var a = arr.slice();
+    for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; }
+    return a;
+  }
+  function esc(s){ return String(s).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];}); }
+
+  // ---- Session-Status (kein dauerhaftes Speichern) ----
+  var gezeigt = {};           // pro Kategorie: Set gezeigter IDs (Einzeltraining)
+  KATEGORIEN.forEach(function(k){ gezeigt[k.key] = {}; });
+
+  var aktuell = { typ:null, cat:null, cards:[] };
+
+  // ---- DOM ----
+  var elHome = document.getElementById('home');
+  var elWork = document.getElementById('work');
+  var elCards = document.getElementById('cards');
+  var elPager = document.getElementById('pager');
+  var elTbMode = document.getElementById('tbMode');
+  var elVlGrid = document.getElementById('vlGrid');
+  var elStat = document.getElementById('statRow');
+  var btnSolutions = document.getElementById('btnSolutions');
+  var btnNext = document.getElementById('btnNext');
+  var btnHome = document.getElementById('btnHome');
+
+  // ---- Statistik-Kopf ----
+  (function(){
+    var total = FRAGEN.length;
+    var mitMuster = FRAGEN.filter(function(f){return f.muster;}).length;
+    elStat.innerHTML =
+      '<span><b>'+total+'</b> Fragen</span>'+
+      '<span><b>'+KATEGORIEN.length+'</b> Themengebiete</span>'+
+      '<span><b>'+mitMuster+'</b> mit echter Musterlösung</span>';
+  })();
+
+  // ---- VL-Auswahl rendern ----
+  KATEGORIEN.forEach(function(k){
+    var liste = GRUPPEN[k.key] || [];
+    var nMuster = liste.filter(function(f){return f.muster;}).length;
+    var b = document.createElement('button');
+    b.className = 'vl-btn';
+    b.disabled = liste.length === 0;
+    b.innerHTML =
+      '<span class="vl-k">'+esc(k.key.toUpperCase())+'</span>'+
+      '<span class="vl-l">'+esc(k.label.replace(/^VL\s*\d+\s*[–-]\s*/,''))+'</span>'+
+      '<span class="vl-meta">'+liste.length+' Fragen · '+nMuster+' Musterlsg.</span>';
+    b.addEventListener('click', function(){ startEinzel(k.key); });
+    elVlGrid.appendChild(b);
+  });
+
+  // ---- Kartendarstellung ----
+  function cardHTML(f, idx){
+    var catTxt = catLabel[f.vl] || f.vl;
+    return '' +
+    '<div class="qcard" data-id="'+esc(f.id)+'">' +
+      '<div class="qhead">' +
+        '<span class="q-cat">'+esc(catTxt)+'</span>' +
+        '<span class="q-no">Frage '+(idx)+'</span>' +
+      '</div>' +
+      '<div class="qbody"><p class="q-frage">'+esc(f.frage)+'</p></div>' +
+      '<div class="field-block">' +
+        '<div class="field-label mine">Meine Antwort</div>' +
+        '<textarea class="answer" placeholder="Antwort hier eintragen …"></textarea>' +
+        '<div class="solwrap hidden">' +
+          '<div class="field-label sol"><span class="tag">Quelle</span> Echte Musterlösung</div>' +
+          muster(f) +
+          '<div class="field-label ai"><span class="tag">KI</span> KI-ergänzte Lösung (aus Skript)</div>' +
+          '<div class="solbox ai">'+esc(f.ki)+
+            '<span class="ai-disclaim">⚙ KI-generiert · ausschließlich auf Basis des Vorlesungsskripts · kein Ersatz für die Musterlösung</span>'+
+          '</div>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }
+  function muster(f){
+    if(f.muster){
+      return '<div class="solbox">'+esc(f.muster)+'</div>';
+    }
+    return '<div class="solbox none">Keine Musterlösung vorhanden. (Für diese Frage liegt in den Dokumenten keine offizielle Lösung vor — siehe KI-ergänzte Lösung unten.)</div>';
+  }
+
+  function renderCards(liste){
+    aktuell.cards = liste;
+    elCards.innerHTML = liste.map(function(f,i){ return cardHTML(f, i+1); }).join('');
+    btnSolutions.textContent = 'Lösungen anzeigen';
+    btnSolutions.dataset.shown = '0';
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+
+  // ---- Lösungen umschalten ----
+  btnSolutions.addEventListener('click', function(){
+    var shown = btnSolutions.dataset.shown === '1';
+    var wraps = elCards.querySelectorAll('.solwrap');
+    wraps.forEach(function(w){ w.classList.toggle('hidden', shown); });
+    btnSolutions.dataset.shown = shown ? '0' : '1';
+    btnSolutions.textContent = shown ? 'Lösungen anzeigen' : 'Lösungen ausblenden';
+  });
+
+  // ---- Modus: Klausur generieren ----
+  function startKlausur(nurMuster){
+    aktuell.typ = nurMuster ? 'exam-real' : 'exam-any';
+    aktuell.cat = null;
+    var liste = [];
+    KATEGORIEN.forEach(function(k){
+      var pool = (GRUPPEN[k.key]||[]).filter(function(f){ return nurMuster ? !!f.muster : true; });
+      if(pool.length){ liste.push(shuffle(pool)[0]); }
+    });
+    elTbMode.innerHTML = (nurMuster ? 'Modus · <b>Echte Klausur</b>' : 'Modus · <b>Beliebige Klausur</b>') +
+      ' — '+liste.length+' Fragen';
+    btnNext.textContent = 'Neue Klausur';
+    elPager.textContent = '';
+    showWork();
+    if(liste.length===0){
+      elCards.innerHTML = '<div class="empty-note">Keine passenden Fragen gefunden.</div>';
+    } else {
+      renderCards(liste);
+    }
+  }
+
+  // ---- Modus: Einzeltraining ----
+  function startEinzel(cat){
+    aktuell.typ = 'einzel';
+    aktuell.cat = cat;
+    elTbMode.innerHTML = 'Einzeltraining · <b>'+esc(catLabel[cat])+'</b>';
+    btnNext.textContent = 'Nächste Frage';
+    showWork();
+    naechsteEinzel();
+  }
+
+  function naechsteEinzel(){
+    var cat = aktuell.cat;
+    var pool = GRUPPEN[cat] || [];
+    var rest = pool.filter(function(f){ return !gezeigt[cat][f.id]; });
+
+    if(rest.length === 0){
+      // alle in der Session gezeigt
+      elCards.innerHTML =
+        '<div class="empty-note">Alle '+pool.length+' Fragen dieses Themengebiets wurden in dieser Session gezeigt.<br>'+
+        'Tipp: „Themengebiet zurücksetzen“ startet die Auswahl neu.</div>';
+      elPager.innerHTML =
+        '<button class="btn small" id="btnReset">Themengebiet zurücksetzen</button>';
+      document.getElementById('btnReset').addEventListener('click', function(){
+        gezeigt[cat] = {};
+        naechsteEinzel();
+      });
+      btnSolutions.dataset.shown='0';
+      btnSolutions.textContent='Lösungen anzeigen';
+      return;
+    }
+
+    var f = shuffle(rest)[0];
+    gezeigt[cat][f.id] = true;
+    var nummer = pool.length - rest.length + 1; // wievielte gezeigte Frage
+    renderCards([f]);
+    elPager.textContent = 'Frage '+nummer+' von '+pool.length+' · '+(rest.length-1)+' verbleiben in dieser Session';
+  }
+
+  // ---- Nächste/Neu ----
+  btnNext.addEventListener('click', function(){
+    if(aktuell.typ === 'einzel'){ naechsteEinzel(); }
+    else if(aktuell.typ === 'exam-real'){ startKlausur(true); }
+    else if(aktuell.typ === 'exam-any'){ startKlausur(false); }
+  });
+
+  // ---- Navigation ----
+  function showWork(){ elHome.classList.add('hidden'); elWork.classList.remove('hidden'); }
+  function showHome(){ elWork.classList.add('hidden'); elHome.classList.remove('hidden'); window.scrollTo({top:0}); }
+  btnHome.addEventListener('click', showHome);
+
+  document.getElementById('modeExamReal').addEventListener('click', function(){ startKlausur(true); });
+  document.getElementById('modeExamAny').addEventListener('click', function(){ startKlausur(false); });
+
+})();
+</script>
+</body>
+</html>
